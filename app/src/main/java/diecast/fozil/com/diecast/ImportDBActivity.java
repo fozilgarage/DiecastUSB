@@ -45,8 +45,6 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class ImportDBActivity extends AppCompatActivity {
 
-    //Comentario para github.
-
     ListView lvBackupFiles;
     BackupFilesAdapter backupFilesAdapter;
     private DataBaseManager dataBaseManager;
