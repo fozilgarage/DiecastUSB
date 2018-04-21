@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="diecast.fozil.com.diecast.ImportDBActivity"
+    android:orientation="vertical"
+    android:id="@+id/layout_import_db">
+
+    <android.support.v7.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Para importar un archivo excel(.xlsx) se debe colocar en la carpeta /Download/Fozilgarage de tu dipositivo. Si las imagenes fueron borradas del dispositivo no podrán ser mostradas. Este proceso no elimina la información existente en el sistema. \nNOTA: Todas las columnas deben ser de tipo Texto incluso las que contienen números.\n\nA continuación se muestran los archivos encontrados, seleccione el archivo a cargar:" />
+
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/lv_backup_files"></ListView>
+
+</android.support.v7.widget.LinearLayoutCompat>

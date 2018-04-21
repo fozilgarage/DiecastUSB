@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="diecast.fozil.com.diecast.AddSeries"
+    android:orientation="vertical">
+
+
+    <android.support.v7.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <Spinner
+        android:id="@+id/sp_serie_brand"
+        style="@android:style/Widget.Holo.Light.Spinner"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:dropDownWidth="match_parent"
+        android:minWidth="246sp"
+        android:paddingBottom="10sp"
+        android:spinnerMode="dialog" />
+
+    <Spinner
+        android:id="@+id/sp_serie_serie"
+        style="@android:style/Widget.Holo.Light.Spinner"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:dropDownWidth="match_parent"
+        android:minWidth="246sp"
+        android:paddingBottom="10sp"
+        android:spinnerMode="dialog"
+        android:visibility="invisible"/>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:paddingTop="50dp">
+
+        <AutoCompleteTextView
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:hint="Nombre"
+        android:id="@+id/tv_serie_name"/>
+
+    </android.support.design.widget.TextInputLayout>
+
+    <Button
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:text="Guardar"
+        android:layout_gravity="center"
+        android:onClick="saveSerie"/>
+
+</LinearLayout>
