@@ -251,7 +251,7 @@ public class CarDetail extends AppCompatActivity {
                     }
 */
                 } else if(options[which] == whatsappOption) {
-                    showSnackBar("Publica en Whatsapp");
+                    showSnackBar("Publica en Whatsapp...");
                 } else {
                     dialog.dismiss();
                 }
