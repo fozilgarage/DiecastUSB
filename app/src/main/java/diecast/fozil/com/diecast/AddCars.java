@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.speech.RecognizerIntent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.FileProvider;
@@ -42,6 +43,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import Utilities.FileUtils;
 import databases.Brand;
@@ -63,6 +65,7 @@ public class AddCars extends AppCompatActivity {
     private static final int SELECT_PICTURE = 101;
     private static final int BRAND_SAVED = 3;
     private static final int SERIE_SAVED = 4;
+    private static final int SPEECH_INPUT = 10;
 
     private DataBaseManager dataBaseManager;
 
@@ -471,6 +474,10 @@ public class AddCars extends AppCompatActivity {
                         sp_car_serie.setSelection(getSerieCursorPosition(data.getIntExtra("id_saved", 0)));
                     }
                     break;
+                case SPEECH_INPUT:
+                    ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                    tv_car_name.setText(result.get(0));
+                    break;
             }
         }
     }
@@ -653,5 +660,16 @@ public class AddCars extends AppCompatActivity {
         inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
         String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
         return Uri.parse(path);
+    }
+
+    public void getSpeechInput(final View view) {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+
+        if (intent.resolveActivity(getPackageManager()) != null)
+            startActivityForResult(intent, SPEECH_INPUT);
+        else
+            Toast.makeText(this, "Tu dispositivo no soporta entrada de texto para esta aplicación.", Toast.LENGTH_LONG).show();
     }
 }
