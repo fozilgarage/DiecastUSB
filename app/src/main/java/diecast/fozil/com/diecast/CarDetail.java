@@ -222,7 +222,7 @@ public class CarDetail extends AppCompatActivity {
 
     private void showShareMenu() {
         final String facebookOption = "Facebook";
-        final String whatsappOption = "Whatsapp";
+        final String whatsappOption = "Enviar imágen a ...";
         final String cancelOption = "Cancelar";
         final CharSequence[] options = {facebookOption, whatsappOption, cancelOption};
         final AlertDialog.Builder builder = new AlertDialog.Builder(CarDetail.this);
@@ -251,7 +251,7 @@ public class CarDetail extends AppCompatActivity {
                     }
 */
                 } else if(options[which] == whatsappOption) {
-                    showSnackBar("Publica en Whatsapp...");
+                    compartirImagen();
                 } else {
                     dialog.dismiss();
                 }
@@ -259,6 +259,19 @@ public class CarDetail extends AppCompatActivity {
         });
 
         builder.show();
+    }
+
+    private void compartirImagen() {
+
+        String imageURL = car.getImage();
+        File image = new File(imageURL);
+        Uri photoUri = FileProvider.getUriForFile(CarDetail.this, BuildConfig.APPLICATION_ID + ".provider", image);
+        final Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(Intent.EXTRA_STREAM, photoUri);
+        intent.setType("image/png");
+        startActivity(Intent.createChooser(intent, "Selecciona aplicación para compartir"));
+
     }
 
     @Override
