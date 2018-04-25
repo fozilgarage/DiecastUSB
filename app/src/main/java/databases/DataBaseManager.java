@@ -134,10 +134,11 @@ public class DataBaseManager {
         db.update(TABLE_NAME_CARS, values, KEY_ID + "=?", new String[]{car.getId() + ""});
     }
 
-    public List<Car> getListCars(final String carName, final boolean isDescOrder) {
+    public List<Car> getListCars(final String carName, final int idBrand, final int idSerie,
+                                 final int idSubserie, final boolean isDescOrder) {
         List<Car> carList = new ArrayList<Car>();
         String[] carColumns = getCarColumns();
-        String likeSentence = "";
+        String whereSentence = "";
         String[] params = new String[]{};
         String order = "asc";
         if (isDescOrder)
@@ -147,15 +148,45 @@ public class DataBaseManager {
             params = new String[names.length];
             int i = 0;
             for (String name : names) {
-                if (!likeSentence.equals(""))
-                    likeSentence += " or  ";
-                likeSentence += KEY_NAME + " like ?";
+                if (!whereSentence.equals(""))
+                    whereSentence += " or  ";
+                whereSentence += KEY_NAME + " like ?";
                 params[i++] ="%" + name + "%";
             }
-            //likeSentence = KEY_NAME + " like ?";
+            //whereSentence = KEY_NAME + " like ?";
             //params = new String[]{"%" + carName + "%"};
         }
-        Cursor cursor = db.query(TABLE_NAME_CARS, carColumns, likeSentence, params, null, null, KEY_ID + " " + order);
+
+        if (idBrand >= 0) {
+            if (whereSentence != "") {
+                whereSentence += "and ";
+            }
+            whereSentence += TABLE_NAME_CARS + "." + KEY_ID_BRAND + "=" + idBrand;
+        }
+
+        if (idSerie >= 0) {
+            if (whereSentence != "") {
+                whereSentence += " and ";
+            }
+            whereSentence += "(" + TABLE_NAME_CARS + "." + KEY_ID_SERIE + "=" + idSerie + " OR " +
+                TABLE_NAME_SERIES + "." + KEY_SERIES_PARENT + "=" + idSerie + ")";
+        }
+
+        if (idSubserie >= 0) {
+            if (whereSentence != "") {
+                whereSentence += " and ";
+            }
+            whereSentence += TABLE_NAME_CARS + "." + KEY_ID_SERIE + "=" + idSubserie;
+        }
+        String query = "SELECT * FROM " + TABLE_NAME_CARS;
+        if (idSerie >= 0)
+            query += " LEFT JOIN " + TABLE_NAME_SERIES + " ON " + TABLE_NAME_CARS + "." + KEY_ID_SERIE + " = " + TABLE_NAME_SERIES + "." + KEY_ID;
+        if (!whereSentence.equals(""))
+            query += " where " + whereSentence;
+
+        Cursor cursor = db.rawQuery(query, params);
+
+        //Cursor cursor = db.query(TABLE_NAME_CARS, carColumns, whereSentence, params, null, null, KEY_ID + " " + order);
 
         if (cursor.moveToFirst()) {
             do {
@@ -176,7 +207,11 @@ public class DataBaseManager {
     }
 
     public List<Car> getListCars(final boolean isDescOrder) {
-        return getListCars(null, isDescOrder);
+        return getListCars(null, -1, -1, -1, isDescOrder);
+    }
+
+    public List<Car> getListCars(final int idBrand, final int idSerie, final int idSubserie, final boolean isDescOrder) {
+        return getListCars(null, idBrand, idSerie, idSubserie, isDescOrder);
     }
 
     public Car getCar(final int idCar) {

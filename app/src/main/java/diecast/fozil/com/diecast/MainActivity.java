@@ -25,19 +25,24 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.github.snowdream.android.widget.SmartImageView;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
+import databases.Brand;
 import databases.Car;
 import databases.DataBaseManager;
+import databases.Serie;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -52,7 +57,23 @@ public class MainActivity extends AppCompatActivity
     LinearLayout ll_search_detail;
     DrawerLayout main_layout;
     SwipeRefreshLayout swipeRefreshLayout;
+    Toolbar toolbarFilter;
 
+    Spinner sp_car_brand;
+    Spinner sp_car_serie;
+    Spinner sp_car_subserie;
+
+    List<Brand> brandList;
+    List<Serie> seriesList;
+    List<Serie> subseriesList;
+
+    DiecastArrayAdapter brandAdapter;
+    DiecastArrayAdapter seriesAdapter;
+    DiecastArrayAdapter subseriesAdapter;
+
+    int idBrand = -1;
+    int idSerie = -1;
+    int idSubserie = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +108,12 @@ public class MainActivity extends AppCompatActivity
                swipeRefreshLayout.setRefreshing(false);
             }
         });
+        toolbarFilter = findViewById(R.id.menuFilter);
+        sp_car_brand = findViewById(R.id.sp_car_brand);
+        sp_car_serie = findViewById(R.id.sp_car_serie);
+        sp_car_subserie = findViewById(R.id.sp_car_subserie);
         loadCatalog();
+        generateBrandsSpinner();
 
     }
 
@@ -105,7 +131,7 @@ public class MainActivity extends AppCompatActivity
         progressDialog.show();
 
         try {
-            List<Car> cars = dataBaseManager.getListCars(true);
+            List<Car> cars = dataBaseManager.getListCars(idBrand, idSerie, idSubserie, true);
             Log.i(ACTIVITY_NAME, "Se obtuvo " + cars.size() + " registros.");
             adapter = new CatalogAdapter(getApplicationContext(), cars);
             listView.setAdapter(adapter);
@@ -216,7 +242,7 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected Void doInBackground(Void... params) {
-            cars = dataBaseManager.getListCars(querySearch, true);
+            cars = dataBaseManager.getListCars(querySearch, idBrand,idSerie,idSubserie,true);
             //MainActivity.getSupportActionBar().setSubtitle(cursor.getCount() + " Autos");
             return null;
         }
@@ -343,4 +369,112 @@ public class MainActivity extends AppCompatActivity
     private void showMessage(final String message) {
         Snackbar.make(findViewById(R.id.drawer_layout), message, Snackbar.LENGTH_LONG).show();
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.menuFilter:
+                toolbarFilter = findViewById(R.id.toolbar_filter);
+                if (toolbarFilter.getVisibility() == View.VISIBLE) {
+                    toolbarFilter.setVisibility(View.GONE);
+                    idBrand = -1;
+                    idSerie = -1;
+                    idSubserie = -1;
+                    sp_car_brand.setSelection(0);
+                    sp_car_serie.setSelection(0);
+                    sp_car_subserie.setSelection(0);
+                    loadCatalog();
+                } else {
+                    toolbarFilter.setVisibility(View.VISIBLE);
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+
+    }
+
+    private void generateBrandsSpinner() {
+
+        List<Brand> brands = new ArrayList<Brand>();
+        brandList = dataBaseManager.getBrands();
+        brands.add(new Brand(-1,"Todos", null));
+        brands.add(new Brand(0,"Desconocido", null));
+        if (brandList != null)
+            brands.addAll(brandList);
+        brandAdapter = new DiecastArrayAdapter(this, R.layout.spinner_row, brands);
+
+        sp_car_brand.setAdapter(brandAdapter);
+
+        sp_car_brand.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Brand brand = (Brand) sp_car_brand.getSelectedItem();
+                idBrand = brand.getId();
+                generateSeriesSpinner(brand.getId());
+                loadCatalog();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+    }
+
+    private void generateSeriesSpinner(final int idBrand) {
+        seriesList = dataBaseManager.getSeries(idBrand);
+        List<Serie> series = new ArrayList<Serie>();
+        series.add(new Serie(-1,"Todas"));
+        series.add(new Serie(0,"Desconocido"));
+        if (seriesList != null)
+            series.addAll(seriesList);
+        seriesAdapter = new DiecastArrayAdapter(this, R.layout.spinner_row, series);
+        sp_car_serie.setAdapter(seriesAdapter);
+
+        sp_car_serie.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Serie serie = (Serie) sp_car_serie.getSelectedItem();
+                idSerie = serie.getId();
+                generateSubserieSpinner(serie.getId());
+                loadCatalog();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
+    private void generateSubserieSpinner(final int idSerie) {
+        subseriesList = dataBaseManager.getSubseries(idSerie);
+        List<Serie> subseries = new ArrayList<Serie>();
+        subseries.add(new Serie(-1,"Todas"));
+        subseries.add(new Serie(0,"Desconocido"));
+        if (subseriesList != null)
+            subseries.addAll(subseriesList);
+        subseriesAdapter = new DiecastArrayAdapter(this, R.layout.spinner_row, subseries);
+        sp_car_subserie.setAdapter(subseriesAdapter);
+
+        sp_car_subserie.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Serie serie = (Serie) sp_car_subserie.getSelectedItem();
+                idSubserie = serie.getId();
+                loadCatalog();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
 }
