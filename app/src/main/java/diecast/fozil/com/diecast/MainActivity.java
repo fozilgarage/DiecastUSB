@@ -75,6 +75,10 @@ public class MainActivity extends AppCompatActivity
     int idSerie = -1;
     int idSubserie = -1;
 
+    ProgressDialog progressDialog;
+
+    int clickOnFilterButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +90,8 @@ public class MainActivity extends AppCompatActivity
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
+
+        progressDialog = new ProgressDialog(MainActivity.this);
 
         String message = getIntent().getStringExtra("message");
         if (message != null && !message.equals(""))
@@ -112,8 +118,10 @@ public class MainActivity extends AppCompatActivity
         sp_car_brand = findViewById(R.id.sp_car_brand);
         sp_car_serie = findViewById(R.id.sp_car_serie);
         sp_car_subserie = findViewById(R.id.sp_car_subserie);
+        adapter = new CatalogAdapter(getApplicationContext(), null);
+        listView.setAdapter(adapter);
         loadCatalog();
-        generateBrandsSpinner();
+        //generateBrandsSpinner();
 
     }
 
@@ -123,26 +131,6 @@ public class MainActivity extends AppCompatActivity
         getSupportActionBar().setTitle(name);
 
         return toolbar;
-    }
-
-    private void loadCatalog() {
-        final ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
-        progressDialog.setMessage("Loading...");
-        progressDialog.show();
-
-        try {
-            List<Car> cars = dataBaseManager.getListCars(idBrand, idSerie, idSubserie, true);
-            Log.i(ACTIVITY_NAME, "Se obtuvo " + cars.size() + " registros.");
-            adapter = new CatalogAdapter(getApplicationContext(), cars);
-            listView.setAdapter(adapter);
-            tv_cars_count.setText(getCountCars(cars) + " Autos");
-            getSupportActionBar().setSubtitle(getCountCars(cars)+ " Autos");
-        } catch (Exception e) {
-            Log.e(ACTIVITY_NAME, e.getMessage());
-            Snackbar.make(main_layout, "Error al obtner datos: " + e.getMessage(), Snackbar.LENGTH_LONG).show();
-        }
-
-        progressDialog.hide();
     }
 
     private int getCountCars(List<Car> cars) {
@@ -273,6 +261,8 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public int getCount() {
+            if (carList == null)
+                return 0;
             return carList.size();
         }
 
@@ -289,7 +279,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         public View getView(final int position, View view, ViewGroup viewGroup) {
 
-            ViewHolder holder;
+            final ViewHolder holder;
 
             if (view == null) {
                 holder = new ViewHolder();
@@ -322,7 +312,7 @@ public class MainActivity extends AppCompatActivity
             String createdAt = carList.get(position).getCreatedAt();
             if (!serieName.equals(""))
                 detail.append("\n");
-            detail.append(createdAt.substring(0, createdAt.length() - 3));
+            detail.append(createdAt.length() > 16 ? createdAt.substring(0, createdAt.length() - 3) : createdAt);
             int count = carList.get(position).getCount();
             String item = " auto";
             if (count > 1)
@@ -379,21 +369,23 @@ public class MainActivity extends AppCompatActivity
                 toolbarFilter = findViewById(R.id.toolbar_filter);
                 if (toolbarFilter.getVisibility() == View.VISIBLE) {
                     toolbarFilter.setVisibility(View.GONE);
+                    if (idBrand >= 0)
+                        loadCatalog();
                     idBrand = -1;
                     idSerie = -1;
                     idSubserie = -1;
                     sp_car_brand.setSelection(0);
                     sp_car_serie.setSelection(0);
                     sp_car_subserie.setSelection(0);
-                    loadCatalog();
                 } else {
                     toolbarFilter.setVisibility(View.VISIBLE);
+                    generateBrandsSpinner();
+                    clickOnFilterButton = 0;
                 }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
-
 
     }
 
@@ -401,7 +393,7 @@ public class MainActivity extends AppCompatActivity
 
         List<Brand> brands = new ArrayList<Brand>();
         brandList = dataBaseManager.getBrands();
-        brands.add(new Brand(-1,"Todos", null));
+        brands.add(new Brand(-1,"Fabricantes (Todos)", null));
         brands.add(new Brand(0,"Desconocido", null));
         if (brandList != null)
             brands.addAll(brandList);
@@ -414,8 +406,18 @@ public class MainActivity extends AppCompatActivity
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Brand brand = (Brand) sp_car_brand.getSelectedItem();
                 idBrand = brand.getId();
-                generateSeriesSpinner(brand.getId());
-                loadCatalog();
+                if (idBrand > 0) {
+                    sp_car_serie.setVisibility(View.VISIBLE);
+                    generateSeriesSpinner(idBrand);
+                } else {
+                    sp_car_serie.setVisibility(View.GONE);
+                    sp_car_subserie.setVisibility(View.GONE);
+                    idSerie = -1;
+                    idSubserie = -1;
+                }
+                if (clickOnFilterButton > 0)
+                    loadCatalog();
+                clickOnFilterButton++;
             }
 
             @Override
@@ -429,7 +431,7 @@ public class MainActivity extends AppCompatActivity
     private void generateSeriesSpinner(final int idBrand) {
         seriesList = dataBaseManager.getSeries(idBrand);
         List<Serie> series = new ArrayList<Serie>();
-        series.add(new Serie(-1,"Todas"));
+        series.add(new Serie(-1,"Series (Todas)"));
         series.add(new Serie(0,"Desconocido"));
         if (seriesList != null)
             series.addAll(seriesList);
@@ -441,7 +443,13 @@ public class MainActivity extends AppCompatActivity
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Serie serie = (Serie) sp_car_serie.getSelectedItem();
                 idSerie = serie.getId();
-                generateSubserieSpinner(serie.getId());
+                if (idSerie > 0) {
+                    sp_car_subserie.setVisibility(View.VISIBLE);
+                    generateSubserieSpinner(idSerie);
+                } else {
+                    sp_car_subserie.setVisibility(View.GONE);
+                    idSubserie = -1;
+                }
                 loadCatalog();
             }
 
@@ -455,7 +463,7 @@ public class MainActivity extends AppCompatActivity
     private void generateSubserieSpinner(final int idSerie) {
         subseriesList = dataBaseManager.getSubseries(idSerie);
         List<Serie> subseries = new ArrayList<Serie>();
-        subseries.add(new Serie(-1,"Todas"));
+        subseries.add(new Serie(-1,"Subseries (Todas)"));
         subseries.add(new Serie(0,"Desconocido"));
         if (subseriesList != null)
             subseries.addAll(subseriesList);
@@ -477,4 +485,29 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+    private void loadCatalog() {
+        progressDialog.setMessage("Cargando...");
+        progressDialog.show();
+        new LoadCatalogTask().execute();
+    }
+
+    private class LoadCatalogTask extends AsyncTask<Void, Void, Void> {
+
+        List<Car> cars;
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            cars = dataBaseManager.getListCars(idBrand, idSerie, idSubserie, true);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            Log.i(ACTIVITY_NAME, "Se obtuvo " + cars.size() + " registros.");
+            adapter.updateResults(cars);
+            tv_cars_count.setText(getCountCars(cars) + " Autos");
+            getSupportActionBar().setSubtitle(getCountCars(cars)+ " Autos");
+            progressDialog.hide();
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package diecast.fozil.com.diecast;
 
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -25,23 +26,23 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.NumberPicker;
-import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
-import org.w3c.dom.Text;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -82,6 +83,13 @@ public class AddCars extends AppCompatActivity {
     Button count_less;
     Button count_more;
     TextView cars_count;
+    EditText et_car_hashtag;
+    EditText et_car_price;
+    EditText et_car_extra;
+    EditText et_car_purchase;
+    DatePickerDialog datePickerDialog;
+
+    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
     int idBrand;
     int idSerie;
@@ -117,6 +125,10 @@ public class AddCars extends AppCompatActivity {
         cars_count.setText("1");
         count_less = findViewById(R.id.count_less);
         count_more = findViewById(R.id.count_more);
+        et_car_hashtag = findViewById(R.id.et_car_hashtag);
+        et_car_price = findViewById(R.id.et_car_price);
+        et_car_extra = findViewById(R.id.et_car_extra);
+        et_car_purchase = findViewById(R.id.et_car_purchase);
         hasImage = false;
 
         count_less.setOnClickListener(new View.OnClickListener() {
@@ -149,6 +161,13 @@ public class AddCars extends AppCompatActivity {
             }
         });
 
+        et_car_purchase.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                datePurchaseClick(view);
+            }
+        });
+
         loadInfoCarEdit();
 
         generateBrandsSpinner();
@@ -167,6 +186,12 @@ public class AddCars extends AppCompatActivity {
         car = dataBaseManager.getCar(idCar);
         tv_car_name.setText(car.getName());
         cars_count.setText(car.getCount() + "");
+        et_car_hashtag.setText(car.getHashtags());
+        et_car_price.setText(car.getPrice() + "");
+        et_car_extra.setText(car.getExtra());
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        et_car_purchase.setText(car.getPurchaseDate());
+
 
         /*if (car.getBrand() != null) {
             sp_car_brand.setSelection(getBrandCursorPosition(car.getBrand().getName()));
@@ -581,6 +606,12 @@ public class AddCars extends AppCompatActivity {
                 car.setBrand(dataBaseManager.getBrandById(idBrand));
             car.setSerie(serie);
             car.setCount(Integer.parseInt(cars_count.getText().toString()));
+            car.setHashtags(et_car_hashtag.getText().toString());
+            Log.d("***", et_car_price.getText().toString());
+            if (!et_car_price.getText().toString().equals(""))
+                car.setPrice(Integer.parseInt(et_car_price.getText().toString()));
+            car.setExtra(et_car_extra.getText().toString());
+            //car.setPurchaseDate(dp_car_purchase.getDayOfMonth() + "/" + dp_car_purchase.getMonth() + "/" + dp_car_purchase.getYear());
             id = dataBaseManager.insertCar(car);
         } else {
             car.setName(tv_car_name.getText().toString());
@@ -591,6 +622,10 @@ public class AddCars extends AppCompatActivity {
             car.setSerie(serie);
             id = car.getId();
             car.setCount(Integer.parseInt(cars_count.getText().toString()));
+            car.setHashtags(et_car_hashtag.getText().toString());
+            car.setPrice(Double.parseDouble(et_car_price.getText().toString()));
+            car.setExtra(et_car_extra.getText().toString());
+            car.setPurchaseDate(et_car_purchase.getText().toString());
             dataBaseManager.updateCar(car);
         }
 
@@ -671,5 +706,39 @@ public class AddCars extends AppCompatActivity {
             startActivityForResult(intent, SPEECH_INPUT);
         else
             Toast.makeText(this, "Tu dispositivo no soporta entrada de texto para esta aplicación.", Toast.LENGTH_LONG).show();
+    }
+
+    public void datePurchaseClick(final View view) {
+        // calender class's instance and get current date , month and year from calender
+        final Calendar c = Calendar.getInstance();
+        if (car != null && car.getPurchaseDate() != null) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                c.setTime(sdf.parse(car.getPurchaseDate()));
+            } catch (final ParseException pe) {
+                Log.e("ERROR", pe.getMessage());
+            }
+        }
+        int mYear = c.get(Calendar.YEAR); // current year
+        int mMonth = c.get(Calendar.MONTH); // current month
+        int mDay = c.get(Calendar.DAY_OF_MONTH); // current day
+        // date picker dialog
+        datePickerDialog = new DatePickerDialog(AddCars.this,
+                new DatePickerDialog.OnDateSetListener() {
+
+                    @Override
+                    public void onDateSet(DatePicker view, int year,
+                                          int monthOfYear, int dayOfMonth) {
+                        // set day of month , month and year value in the edit text
+                        String dateText = "";
+                        if (dayOfMonth < 10) dateText = ("0" + dayOfMonth); else dateText = (dayOfMonth + "");
+                        monthOfYear++;
+                        if (monthOfYear < 10) dateText += "/0" + monthOfYear; else dateText += "/" + monthOfYear;
+                        dateText += "/" + year;
+                        et_car_purchase.setText(dateText);
+
+                    }
+                }, mYear, mMonth, mDay);
+        datePickerDialog.show();
     }
 }

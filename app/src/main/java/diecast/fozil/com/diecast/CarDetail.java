@@ -28,7 +28,10 @@ import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.widget.ShareDialog;
 
+import org.w3c.dom.Text;
+
 import java.io.File;
+import java.text.SimpleDateFormat;
 
 import databases.Car;
 import databases.DataBaseManager;
@@ -44,6 +47,10 @@ public class CarDetail extends AppCompatActivity {
     TextView carCount;
     TextView carSerie;
     TextView carSubserie;
+    TextView carHashtags;
+    TextView carPrice;
+    TextView carExtra;
+    TextView carPurchase;
 
     public static final String ACTIVITY_NAME = "CAR_DETAIL_ACTIVITY";
     private DataBaseManager dataBaseManager;
@@ -66,6 +73,10 @@ public class CarDetail extends AppCompatActivity {
         carCount = (TextView) findViewById(R.id.detail_count);
         carSerie = (TextView) findViewById(R.id.detail_serie);
         carSubserie = (TextView) findViewById(R.id.detail_subserie);
+        carHashtags = findViewById(R.id.detail_hashtags);
+        carPrice = findViewById(R.id.detail_price);
+        carExtra = findViewById(R.id.detail_extra);
+        carPurchase = findViewById(R.id.detail_purchase);
 
         callbackManager = CallbackManager.Factory.create();
         shareDialog = new ShareDialog(this);
@@ -103,7 +114,7 @@ public class CarDetail extends AppCompatActivity {
             carBrandName.setText(TextsDefault.UNKNOWN.getText());
 
 
-        carCreatedAt.setText(car.getCreatedAt().substring(0, car.getCreatedAt().length() - 3));
+        carCreatedAt.setText(car.getCreatedAt().length() > 16 ? car.getCreatedAt().substring(0, car.getCreatedAt().length() - 3) : car.getCreatedAt());
         carCount.setText(car.getCount()+"");
         if (car.getSerie() != null) {
             if (car.getSerie().getParent() != null && car.getSerie().getParent().getId() > 0) {
@@ -117,6 +128,11 @@ public class CarDetail extends AppCompatActivity {
             carSerie.setText(TextsDefault.UNKNOWN.getText());
             carSubserie.setText(TextsDefault.UNKNOWN.getText());
         }
+
+        carHashtags.setText(car.getHashtags());
+        carPrice.setText("$ " + car.getPrice());
+        carExtra.setText(car.getExtra());
+        carPurchase.setText(car.getPurchaseDate() != null ? car.getPurchaseDate() : "---");
 
 
         CollapsingToolbarLayout collapser = (CollapsingToolbarLayout) findViewById(R.id.collapser);

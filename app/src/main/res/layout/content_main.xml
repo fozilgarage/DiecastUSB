@@ -16,6 +16,36 @@
         app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         />
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_filter"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:popupTheme="@style/AppTheme.PopupOverlay"
+        android:visibility="gone">
+
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/sp_car_brand"
+            style="@android:style/Widget.Holo.Light.Spinner"/>
+
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/sp_car_serie"
+            style="@android:style/Widget.Holo.Light.Spinner"
+            android:visibility="gone"/>
+
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/sp_car_subserie"
+            style="@android:style/Widget.Holo.Light.Spinner"
+            android:visibility="gone"/>
+
+    </android.support.v7.widget.Toolbar>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="30dp"

@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.WindowManager;
 
 import databases.DataBaseManager;
+import databases.DataBaseManagerUpdates;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -41,7 +42,7 @@ public class SplashActivity extends AppCompatActivity {
 
         private static final String DB_NAME = "diecast.db";
 
-        private static final int DB_SCHEME_VERSION = 1;
+        private static final int DB_SCHEME_VERSION = 2;
 
         public DataBaseHelper(Context context) {
             super(context, DB_NAME, null, DB_SCHEME_VERSION);
@@ -56,15 +57,17 @@ public class SplashActivity extends AppCompatActivity {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-           /* switch (oldVersion) {
+            switch (oldVersion) {
                 case 1:
-                    db.execSQL(DataBaseManager.ALTER_TABLE_CARS_ADD_FAVORITE);
-                    db.execSQL(DataBaseManager.ALTER_TABLE_CARS_ADD_COUNT);
-                case 2:
-                    db.execSQL(DataBaseManager.CREATE_TABLE_SERIES);
-                case 3:
-                    db.execSQL(DataBaseManager.INSERT_INITIAL_VALUES_SERIES);
-            }*/
+                    db.execSQL(DataBaseManagerUpdates.ALTER_TABLE_CARS_ADD_HASHTAG);
+                    db.execSQL(DataBaseManagerUpdates.ALTER_TABLE_CARS_ADD_PRICE);
+                    db.execSQL(DataBaseManagerUpdates.ALTER_TABLE_CARS_ADD_EXTRA);
+                    db.execSQL(DataBaseManagerUpdates.ALTER_TABLE_CARS_ADD_PURCHASE_DATE);
+              //  case 2:
+              //      db.execSQL(DataBaseManager.CREATE_TABLE_SERIES);
+              //  case 3:
+              //      db.execSQL(DataBaseManager.INSERT_INITIAL_VALUES_SERIES);
+            }
         }
     }
 }

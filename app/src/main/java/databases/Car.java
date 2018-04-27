@@ -1,5 +1,6 @@
 package databases;
 
+
 /**
  * Created by eduardo.benitez on 17/10/2017.
  */
@@ -18,10 +19,19 @@ public class Car extends Diecast{
 
     private int count;
 
+    private String hashtags;
+
+    private String purchaseDate;
+
+    private double price;
+
+    private String extra;
+
     public Car() {
     }
 
-    public Car(final String name, final Brand brand, final Serie serie, final String image) {
+    public Car(final String name, final Brand brand, final Serie serie, final String image,
+               final String hashtags) {
         setName(name);
         this.image = image;
     }
@@ -72,6 +82,38 @@ public class Car extends Diecast{
 
     public void setCount(final int count) {
         this.count = count;
+    }
+
+    public String getHashtags() {
+        return hashtags;
+    }
+
+    public void setHashtags(final String hashtags) {
+        this.hashtags = hashtags;
+    }
+
+    public String getPurchaseDate() {
+        return purchaseDate;
+    }
+
+    public void setPurchaseDate(final String purchaseDate) {
+        this.purchaseDate = purchaseDate;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(final double price) {
+        this.price = price;
+    }
+
+    public String getExtra() {
+        return extra;
+    }
+
+    public void setExtra(final String extra) {
+        this.extra = extra;
     }
 
 }

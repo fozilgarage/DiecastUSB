@@ -24,21 +24,24 @@ public class DataBaseManager {
     public static final String KEY_ID = "_id";
     public static final String KEY_NAME = "name";
     public static final String KEY_CREATED_AT = "created_at";
+    public static final String KEY_EXTRA = "extra";
 
     public static final String KEY_ID_BRAND = "id_brand";
     public static final String KEY_ID_SERIE = "id_serie";
     public static final String KEY_CARS_IMAGE = "image";
     public static final String KEY_CARS_FAVORITE = "is_favorite";
     public static final String KEY_CARS_COUNT = "count";
+    public static final String KEY_CARS_HASHTAG = "hashtag";
+    public static final String KEY_CARS_PRICE = "price";
+    public static final String KEY_CARS_PURCHASE_DATE = "purchase_date";
 
-    public static final String KEY_BRAND_EXTRA = "extra";
 
     public static final String KEY_SERIES_PARENT = "id_serie_parent";
 
     public static void main(final String[] args) {
-        System.out.println(DataBaseManager.CREATE_TABLE_SERIES);
-        System.out.println(DataBaseManager.CREATE_TABLE_BRANDS);
-        System.out.println(DataBaseManager.CREATE_TABLE_CARS);
+        Log.d("DB", DataBaseManager.CREATE_TABLE_SERIES);
+        Log.d("DB", DataBaseManager.CREATE_TABLE_BRANDS);
+        Log.d("DB", DataBaseManager.CREATE_TABLE_CARS);
     }
 
     public static final String CREATE_TABLE_SERIES = "create table " + TABLE_NAME_SERIES + " ("
@@ -53,7 +56,7 @@ public class DataBaseManager {
     public static final String CREATE_TABLE_BRANDS = "create table " + TABLE_NAME_BRANDS + " ("
             + KEY_ID + " integer primary key autoincrement,"
             + KEY_NAME + " text not null,"
-            + KEY_BRAND_EXTRA + " text,"
+            + KEY_EXTRA + " text,"
             + KEY_CREATED_AT + " datetime not null default (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')));";
 
     public static final String CREATE_TABLE_CARS = "create table " + TABLE_NAME_CARS + " ("
@@ -64,6 +67,10 @@ public class DataBaseManager {
             + KEY_CARS_IMAGE + " text,"
             + KEY_CARS_FAVORITE + " integer default 0,"
             + KEY_CARS_COUNT + " integer default 1,"
+            + KEY_CARS_HASHTAG + " text,"
+            + KEY_CARS_PRICE + " integer,"
+            + KEY_CARS_PURCHASE_DATE + " datetime,"
+            + KEY_EXTRA + " text,"
             + KEY_CREATED_AT + " datetime default (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')),"
             + " FOREIGN KEY ("+ KEY_ID_BRAND +") REFERENCES "+TABLE_NAME_BRANDS+"("+KEY_ID+") on delete cascade,"
             + " FOREIGN KEY ("+ KEY_ID_SERIE +") REFERENCES "+TABLE_NAME_SERIES+"("+KEY_ID+") on delete cascade);";
@@ -82,6 +89,7 @@ public class DataBaseManager {
         db = dataBaseHelper.getWritableDatabase();
 
     }
+
 
     public void removeAll() {
         db.delete(TABLE_NAME_SERIES, null, null);
@@ -111,18 +119,26 @@ public class DataBaseManager {
         values.put(KEY_CARS_IMAGE, car.getImage());
         values.put(KEY_CARS_FAVORITE, car.isFavorite());
         values.put(KEY_CARS_COUNT, car.getCount() > 0 ? car.getCount() : 1);
+        values.put(KEY_CARS_HASHTAG, car.getHashtags());
+        values.put(KEY_CARS_PRICE, car.getPrice());
+        values.put(KEY_EXTRA, car.getExtra());
+        values.put(KEY_CARS_PURCHASE_DATE, car.getPurchaseDate());
+        if (car.getCreatedAt() != null && !car.getCreatedAt().equals(""))
+            values.put(KEY_CREATED_AT, car.getCreatedAt());
 
         return values;
     }
 
     private String[] getCarColumns() {
         return new String[]{KEY_ID, KEY_NAME, KEY_ID_BRAND, KEY_ID_SERIE, KEY_CARS_IMAGE,
-                KEY_CREATED_AT, KEY_CARS_FAVORITE, KEY_CARS_COUNT};
+                KEY_CREATED_AT, KEY_CARS_FAVORITE, KEY_CARS_COUNT, KEY_CARS_HASHTAG, KEY_CARS_PRICE,
+                KEY_EXTRA, KEY_CARS_PURCHASE_DATE};
     }
 
     public long insertCar(final Car car) {
         ContentValues values = getCarValuesWithoutId(car);
-        return db.insert(TABLE_NAME_CARS, null, values);
+        long result = db.insert(TABLE_NAME_CARS, null, values);
+        return result;
     }
 
     public void deleteCar(int idCar) {
@@ -178,15 +194,18 @@ public class DataBaseManager {
             }
             whereSentence += TABLE_NAME_CARS + "." + KEY_ID_SERIE + "=" + idSubserie;
         }
-        String query = "SELECT * FROM " + TABLE_NAME_CARS;
+        String query = "SELECT " + TABLE_NAME_CARS + ".* FROM " + TABLE_NAME_CARS;
         if (idSerie >= 0)
             query += " LEFT JOIN " + TABLE_NAME_SERIES + " ON " + TABLE_NAME_CARS + "." + KEY_ID_SERIE + " = " + TABLE_NAME_SERIES + "." + KEY_ID;
         if (!whereSentence.equals(""))
             query += " where " + whereSentence;
+        query += " order by " + KEY_ID + " " + order;
 
         Cursor cursor = db.rawQuery(query, params);
 
         //Cursor cursor = db.query(TABLE_NAME_CARS, carColumns, whereSentence, params, null, null, KEY_ID + " " + order);
+
+        //Cursor cursor = db.query(TABLE_NAME_CARS, carColumns, likeSentence, params, null, null, KEY_ID + " " + order);
 
         if (cursor.moveToFirst()) {
             do {
@@ -198,6 +217,10 @@ public class DataBaseManager {
                 car.setImage(cursor.getString(cursor.getColumnIndex(KEY_CARS_IMAGE)));
                 car.setCreatedAt(cursor.getString(cursor.getColumnIndex(KEY_CREATED_AT)));
                 car.setCount(cursor.getInt(cursor.getColumnIndex(KEY_CARS_COUNT)));
+                car.setHashtags(cursor.getString(cursor.getColumnIndex(KEY_CARS_HASHTAG)));
+                car.setPrice(cursor.getInt(cursor.getColumnIndex(KEY_CARS_PRICE)));
+                car.setExtra(cursor.getString(cursor.getColumnIndex(KEY_EXTRA)));
+                car.setPurchaseDate(cursor.getString(cursor.getColumnIndex(KEY_CARS_PURCHASE_DATE)));
 
                 carList.add(car);
             } while (cursor.moveToNext());
@@ -235,7 +258,13 @@ public class DataBaseManager {
                     isFavorite = true;
                 car.setFavorite(isFavorite);
                 car.setCount(cursor.getInt(cursor.getColumnIndex(KEY_CARS_COUNT)));
+                car.setHashtags(cursor.getString(cursor.getColumnIndex(KEY_CARS_HASHTAG)));
+                car.setPrice(cursor.getInt(cursor.getColumnIndex(KEY_CARS_PRICE)));
+                car.setExtra(cursor.getString(cursor.getColumnIndex(KEY_EXTRA)));
+                car.setPurchaseDate(cursor.getString(cursor.getColumnIndex(KEY_CARS_PURCHASE_DATE)));
             }
+        } catch (Exception e) {
+            Log.e("DataBaseManager", e.getMessage());
         }finally {
             cursor.close();
         }
@@ -248,6 +277,7 @@ public class DataBaseManager {
         db.update(TABLE_NAME_CARS, values, KEY_ID + "=?", new String[]{idCar + ""});
     }
 
+
     /***********************************************/
     /*
     /*      Table Brands
@@ -257,13 +287,13 @@ public class DataBaseManager {
     public ContentValues getBrandValues(final Brand brand) {
         ContentValues values = new ContentValues();
         values.put(KEY_NAME, brand.getName());
-        values.put(KEY_BRAND_EXTRA, brand.getExtra());
+        values.put(KEY_EXTRA, brand.getExtra());
 
         return values;
     }
 
     private String[] getBrandColumns() {
-        return new String[]{KEY_ID, KEY_NAME, KEY_BRAND_EXTRA, KEY_CREATED_AT};
+        return new String[]{KEY_ID, KEY_NAME, KEY_EXTRA, KEY_CREATED_AT};
     }
 
     public void insertBrand(final Brand brand) {
@@ -286,7 +316,7 @@ public class DataBaseManager {
                 Brand brand = new Brand();
                 brand.setId(Integer.parseInt(brandsCursor.getString(brandsCursor.getColumnIndex(KEY_ID))));
                 brand.setName(brandsCursor.getString(brandsCursor.getColumnIndex(KEY_NAME)));
-                brand.setExtra(brandsCursor.getString(brandsCursor.getColumnIndex(KEY_BRAND_EXTRA)));
+                brand.setExtra(brandsCursor.getString(brandsCursor.getColumnIndex(KEY_EXTRA)));
                 brand.setCreatedAt(brandsCursor.getString(brandsCursor.getColumnIndex(KEY_CREATED_AT)));
 
                 brandList.add(brand);
@@ -307,7 +337,7 @@ public class DataBaseManager {
             cursor.moveToFirst();
             brand.setId(cursor.getInt(cursor.getColumnIndex(KEY_ID)));
             brand.setName(cursor.getString(cursor.getColumnIndex(KEY_NAME)));
-            brand.setExtra(cursor.getString(cursor.getColumnIndex(KEY_BRAND_EXTRA)));
+            brand.setExtra(cursor.getString(cursor.getColumnIndex(KEY_EXTRA)));
             brand.setCreatedAt(cursor.getString(cursor.getColumnIndex(KEY_CREATED_AT)));
         }
 
@@ -326,7 +356,7 @@ public class DataBaseManager {
             if (cursorBrand.moveToFirst()) {
                 brand.setId(Integer.parseInt(cursorBrand.getString(cursorBrand.getColumnIndex(KEY_ID))));
                 brand.setName(cursorBrand.getString(cursorBrand.getColumnIndex(KEY_NAME)));
-                brand.setExtra(cursorBrand.getString(cursorBrand.getColumnIndex(KEY_BRAND_EXTRA)));
+                brand.setExtra(cursorBrand.getString(cursorBrand.getColumnIndex(KEY_EXTRA)));
                 brand.setCreatedAt(cursorBrand.getString(cursorBrand.getColumnIndex(KEY_CREATED_AT)));
             }
         }finally {

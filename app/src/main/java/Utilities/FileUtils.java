@@ -17,6 +17,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import databases.Car;
@@ -96,7 +98,11 @@ public class FileUtils {
             rowHeader.createCell(4).setCellValue("Subserie");
             rowHeader.createCell(5).setCellValue("Favorito");
             rowHeader.createCell(6).setCellValue("Cantidad");
-            rowHeader.createCell(7).setCellValue("Imagen");
+            rowHeader.createCell(7).setCellValue("Precio");
+            rowHeader.createCell(8).setCellValue("Fecha de Compra");
+            rowHeader.createCell(9).setCellValue("Información Extra");
+            rowHeader.createCell(10).setCellValue("Imagen");
+            rowHeader.createCell(11).setCellValue("Fecha de agregado");
 
             int rowNum = 1;
 
@@ -119,7 +125,11 @@ public class FileUtils {
                 rowCar.createCell(4).setCellValue(subserie);
                 rowCar.createCell(5).setCellValue((car.isFavorite() ? "SI" : "NO"));
                 rowCar.createCell(6).setCellValue(car.getCount() + "");
-                rowCar.createCell(7).setCellValue(car.getImage());
+                rowCar.createCell(7).setCellValue(car.getPrice());
+                rowCar.createCell(8).setCellValue(car.getPurchaseDate());
+                rowCar.createCell(9).setCellValue(car.getExtra());
+                rowCar.createCell(10).setCellValue(car.getImage());
+                rowCar.createCell(11).setCellValue(getDateExcelFormat(car.getCreatedAt()));
                 rowNum++;
             }
 
@@ -132,6 +142,24 @@ public class FileUtils {
             ioe.printStackTrace();
         }
 
+    }
+
+    private static String getDateExcelFormat(String dateDB) {
+        try {
+            if (dateDB.length() == 10) dateDB += " 00:00:00";
+            if (dateDB.contains("/")) {
+                return dateDB;
+            } else {
+                SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                SimpleDateFormat sdf2 = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                Date createdAt = sdf1.parse(dateDB);
+                return sdf2.format(createdAt);
+            }
+
+        } catch (Exception e) {
+            Log.e("FileUtils", e.getMessage());
+        }
+        return "";
     }
 
 }

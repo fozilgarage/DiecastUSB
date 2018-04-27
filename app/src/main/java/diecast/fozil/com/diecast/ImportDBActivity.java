@@ -264,7 +264,11 @@ public class ImportDBActivity extends AppCompatActivity {
                         }
                         car.setFavorite(isFavorite(myRow.getCell(5).getStringCellValue()));
                         car.setCount(Integer.parseInt(myRow.getCell(6).getStringCellValue()));
-                        car.setImage(myRow.getCell(7).getStringCellValue());
+                        car.setPrice(myRow.getCell(7).getNumericCellValue());
+                        car.setPurchaseDate(myRow.getCell(8).getStringCellValue());
+                        car.setExtra(myRow.getCell(9).getStringCellValue());
+                        car.setImage(myRow.getCell(10).getStringCellValue());
+                        car.setCreatedAt(myRow.getCell(11).getStringCellValue());
 
                         dataBaseManager.insertCar(car);
                     }
