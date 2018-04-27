@@ -500,7 +500,7 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected Void doInBackground(Void... voids) {
-            cars = dataBaseManager.getListCars(idBrand, idSerie, idSubserie, true);
+            cars = dataBaseManager.getListCars(querySearch, idBrand,idSerie,idSubserie,true);
             return null;
         }
 
