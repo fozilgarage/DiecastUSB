@@ -244,7 +244,10 @@ public class MainActivity extends AppCompatActivity
                     size += car.getCount();
                 else
                     size++;
-            tv_cars_count.setText(size + " Autos");
+            if (size == 1)
+                tv_cars_count.setText(size + " Auto encontrado");
+            else
+                tv_cars_count.setText(size + " Autos encontrados");
         }
 
     }
