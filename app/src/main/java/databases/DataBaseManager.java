@@ -177,35 +177,40 @@ public class DataBaseManager {
             if (whereSentence != "") {
                 whereSentence += "and ";
             }
-            whereSentence += TABLE_NAME_CARS + "." + KEY_ID_BRAND + "=" + idBrand;
+            if (idBrand == 0)
+                whereSentence += TABLE_NAME_CARS + "." + KEY_ID_BRAND + " IS NULL ";
+            else
+                whereSentence += TABLE_NAME_CARS + "." + KEY_ID_BRAND + "=" + idBrand;
         }
 
         if (idSerie >= 0) {
             if (whereSentence != "") {
                 whereSentence += " and ";
             }
-            whereSentence += "(" + TABLE_NAME_CARS + "." + KEY_ID_SERIE + "=" + idSerie + " OR " +
-                TABLE_NAME_SERIES + "." + KEY_SERIES_PARENT + "=" + idSerie + ")";
+            if (idSerie == 0)
+                whereSentence += TABLE_NAME_CARS + "." + KEY_ID_SERIE + " IS NULL ";
+            else
+                whereSentence += "(" + TABLE_NAME_CARS + "." + KEY_ID_SERIE + "=" + idSerie + " OR " +
+                    TABLE_NAME_SERIES + "." + KEY_SERIES_PARENT + "=" + idSerie + ")";
         }
 
         if (idSubserie >= 0) {
             if (whereSentence != "") {
                 whereSentence += " and ";
             }
-            whereSentence += TABLE_NAME_CARS + "." + KEY_ID_SERIE + "=" + idSubserie;
+            if (idSubserie == 0)
+                whereSentence += TABLE_NAME_CARS + "." + KEY_ID_SERIE + " = " + idSerie;
+            else
+                whereSentence += TABLE_NAME_CARS + "." + KEY_ID_SERIE + "=" + idSubserie;
         }
         String query = "SELECT " + TABLE_NAME_CARS + ".* FROM " + TABLE_NAME_CARS;
-        if (idSerie >= 0)
+        if (idSerie > 0)
             query += " LEFT JOIN " + TABLE_NAME_SERIES + " ON " + TABLE_NAME_CARS + "." + KEY_ID_SERIE + " = " + TABLE_NAME_SERIES + "." + KEY_ID;
         if (!whereSentence.equals(""))
             query += " where " + whereSentence;
         query += " order by " + KEY_ID + " " + order;
 
         Cursor cursor = db.rawQuery(query, params);
-
-        //Cursor cursor = db.query(TABLE_NAME_CARS, carColumns, whereSentence, params, null, null, KEY_ID + " " + order);
-
-        //Cursor cursor = db.query(TABLE_NAME_CARS, carColumns, likeSentence, params, null, null, KEY_ID + " " + order);
 
         if (cursor.moveToFirst()) {
             do {
