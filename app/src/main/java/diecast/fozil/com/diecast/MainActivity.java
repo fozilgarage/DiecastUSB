@@ -48,6 +48,8 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     public static final String ACTIVITY_NAME = "MAIN_ACTIVITY";
+    public static final int SAVE_CAR = 1;
+    public static final int VIEW_CAR = 2;
     private DataBaseManager dataBaseManager;
 
     ListView listView;
@@ -121,7 +123,6 @@ public class MainActivity extends AppCompatActivity
         adapter = new CatalogAdapter(getApplicationContext(), null);
         listView.setAdapter(adapter);
         loadCatalog();
-        //generateBrandsSpinner();
 
     }
 
@@ -147,7 +148,7 @@ public class MainActivity extends AppCompatActivity
 
     public void goToAddCar(View view) {
         Intent intent = new Intent(MainActivity.this, AddCars.class);
-        startActivity(intent);
+        startActivityForResult(intent, SAVE_CAR);
     }
 
     @Override
@@ -339,7 +340,7 @@ public class MainActivity extends AppCompatActivity
                 public void onClick(View v) {
                     Intent intent = new Intent(MainActivity.this, CarDetail.class);
                     intent.putExtra("id_car", carList.get(position).getId());
-                    startActivity(intent);
+                    startActivityForResult(intent, VIEW_CAR);
                 }
             });
 
@@ -511,6 +512,20 @@ public class MainActivity extends AppCompatActivity
             tv_cars_count.setText(getCountCars(cars) + " Autos");
             getSupportActionBar().setSubtitle(getCountCars(cars)+ " Autos");
             progressDialog.hide();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case VIEW_CAR:
+                case SAVE_CAR:
+                    loadCatalog();
+                    break;
+            }
         }
     }
 }

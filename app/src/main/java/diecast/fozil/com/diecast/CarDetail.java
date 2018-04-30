@@ -28,10 +28,7 @@ import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.widget.ShareDialog;
 
-import org.w3c.dom.Text;
-
 import java.io.File;
-import java.text.SimpleDateFormat;
 
 import databases.Car;
 import databases.DataBaseManager;
@@ -53,6 +50,7 @@ public class CarDetail extends AppCompatActivity {
     TextView carPurchase;
 
     public static final String ACTIVITY_NAME = "CAR_DETAIL_ACTIVITY";
+    public static final int EDIT_CAR = 3;
     private DataBaseManager dataBaseManager;
     Car car;
     int idCar;
@@ -198,6 +196,7 @@ public class CarDetail extends AppCompatActivity {
         switch (id) {
             case android.R.id.home:
                 finish();
+                return true;
             case R.id.action_favorite:
                 showSnackBar("Añadir a favoritos");
                  return true;
@@ -207,7 +206,7 @@ public class CarDetail extends AppCompatActivity {
             case R.id.action_edit:
                 Intent intent = new Intent(CarDetail.this, AddCars.class);
                 intent.putExtra("id_car", car.getId());
-                startActivity(intent);
+                startActivityForResult(intent, EDIT_CAR);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -293,7 +292,17 @@ public class CarDetail extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        callbackManager.onActivityResult(requestCode, resultCode, data);
+        //callbackManager.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case EDIT_CAR:
+                    setResult(RESULT_OK);
+                    finish();
+                    startActivity(getIntent());
+                    break;
+            }
+        }
     }
 
 

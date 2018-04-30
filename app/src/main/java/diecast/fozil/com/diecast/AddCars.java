@@ -1,5 +1,6 @@
 package diecast.fozil.com.diecast;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -633,9 +634,12 @@ public class AddCars extends AppCompatActivity {
         if (typeImageUpload == 1 || typeImageUpload == 2)
             saveCarPicture(id);
         //Snackbar.make(view, R.string.app_name, Snackbar.LENGTH_SHORT).show();
-        Toast.makeText(AddCars.this, "Se agrego un nuevo elemento al catalogo de autos", Toast.LENGTH_LONG).show();
-        Intent intent = new Intent(AddCars.this, MainActivity.class);
-        startActivity(intent);
+        if (car.getId() < 1)
+            Toast.makeText(AddCars.this, "Se agrego un nuevo elemento al catalogo de autos", Toast.LENGTH_LONG).show();
+        else
+            Toast.makeText(AddCars.this, "Se edito elemento en catalogo de autos", Toast.LENGTH_LONG).show();
+        //Intent returnIntent = new Intent();
+        setResult(Activity.RESULT_OK);
         finish();
     }
 
