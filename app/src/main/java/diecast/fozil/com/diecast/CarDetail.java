@@ -168,8 +168,7 @@ public class CarDetail extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         Log.i(ACTIVITY_NAME, "Elimina ID_CAR = " + idCar);
                         dataBaseManager.deleteCar(idCar);
-                        Intent intent = new Intent(CarDetail.this, MainActivity.class);
-                        startActivity(intent);
+                        setResult(RESULT_OK);
                         finish();
                     }
                 });
