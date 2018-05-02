@@ -166,7 +166,7 @@ public class DataBaseManager {
             for (String name : names) {
                 if (!whereSentence.equals(""))
                     whereSentence += " or  ";
-                whereSentence += KEY_NAME + " like ?";
+                whereSentence += TABLE_NAME_CARS + "." + KEY_NAME + " like ? ";
                 params[i++] ="%" + name + "%";
             }
             //whereSentence = KEY_NAME + " like ?";
@@ -208,7 +208,7 @@ public class DataBaseManager {
             query += " LEFT JOIN " + TABLE_NAME_SERIES + " ON " + TABLE_NAME_CARS + "." + KEY_ID_SERIE + " = " + TABLE_NAME_SERIES + "." + KEY_ID;
         if (!whereSentence.equals(""))
             query += " where " + whereSentence;
-        query += " order by " + KEY_ID + " " + order;
+        query += " order by " + TABLE_NAME_CARS + "." + KEY_ID + " " + order;
 
         Cursor cursor = db.rawQuery(query, params);
 
