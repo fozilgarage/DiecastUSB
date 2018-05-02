@@ -250,13 +250,16 @@ public class AddCars extends AppCompatActivity {
     }
 
     private void generateSeriesSpinner(final int idBrand) {
-        seriesList = dataBaseManager.getSeries(idBrand);
         List<Serie> series = new ArrayList<Serie>();
         series.add(new Serie("Desconocido"));
-        if (seriesList != null)
-            series.addAll(seriesList);
-        if (idBrand > 0)
+
+
+        if (idBrand > 0) {
+            seriesList = dataBaseManager.getSeries(idBrand);
+            if (seriesList != null)
+                series.addAll(seriesList);
             series.add(new Serie(-1, "Agregar Nuevo ..."));
+        }
         seriesAdapter = new DiecastArrayAdapter(this, R.layout.spinner_row, series);
         sp_car_serie.setAdapter(seriesAdapter);
 
