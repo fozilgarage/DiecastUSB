@@ -87,22 +87,21 @@ public class DataBaseManager {
 
     public DataBaseManager(Context context) {
         dataBaseHelper = DataBaseHelper.getInstance(context);
+        dbOpen();
     }
 
-    private void dbOpen() {
+    public void dbOpen() {
         db = dataBaseHelper.getDataBase();
     }
 
-    private void dbClose() {
+    public void dbClose() {
         dataBaseHelper.close();
     }
 
     public void removeAll() {
-        dbOpen();
         db.delete(TABLE_NAME_SERIES, null, null);
         db.delete(TABLE_NAME_BRANDS, null, null);
         db.delete(TABLE_NAME_CARS, null, null);
-        dbClose();
     }
 
     public ContentValues getCarValues(final Car car) {
@@ -144,10 +143,8 @@ public class DataBaseManager {
     }
 
     public long insertCar(final Car car) {
-        dbOpen();
         ContentValues values = getCarValuesWithoutId(car);
         long result = db.insert(TABLE_NAME_CARS, null, values);
-        dbClose();
         return result;
     }
 
@@ -162,7 +159,6 @@ public class DataBaseManager {
 
     public List<Car> getListCars(final String carName, final int idBrand, final int idSerie,
                                  final int idSubserie, final boolean isDescOrder) {
-        dbOpen();
         List<Car> carList = new ArrayList<Car>();
         String[] carColumns = getCarColumns();
         String whereSentence = "";
@@ -242,7 +238,7 @@ public class DataBaseManager {
             } while (cursor.moveToNext());
         }
 
-        dbClose();
+        cursor.close();
         return carList;
     }
 
@@ -285,6 +281,7 @@ public class DataBaseManager {
         }finally {
             cursor.close();
         }
+
         return car;
     }
 
@@ -314,10 +311,8 @@ public class DataBaseManager {
     }
 
     public void insertBrand(final Brand brand) {
-        dbOpen();
         ContentValues values = getBrandValues(brand);
         db.insert(TABLE_NAME_BRANDS, null, values);
-        dbClose();
     }
 
     private Cursor getBrandsCursor() {
@@ -326,7 +321,6 @@ public class DataBaseManager {
     }
 
     public List<Brand> getBrands() {
-        dbOpen();
         Cursor brandsCursor = getBrandsCursor();
 
         List<Brand> brandList = null;
@@ -343,13 +337,12 @@ public class DataBaseManager {
             } while (brandsCursor.moveToNext());
         }
 
-        dbClose();
+        brandsCursor.close();
         return brandList;
 
     }
 
     public Brand getBrandByName(final String brandName) {
-        dbOpen();
         String[] brandColumns = getBrandColumns();
         Cursor cursor = db.query(TABLE_NAME_BRANDS, brandColumns, KEY_NAME + " = ?", new String[]{brandName}, null, null, null);
 
@@ -363,31 +356,30 @@ public class DataBaseManager {
             brand.setCreatedAt(cursor.getString(cursor.getColumnIndex(KEY_CREATED_AT)));
         }
 
-        dbClose();
+        cursor.close();
         return brand;
     }
 
     public Brand getBrandById(final int idBrand) {
-        dbOpen();
         String[] brandColumns = getBrandColumns();
         Cursor result = db.query(TABLE_NAME_BRANDS, brandColumns, KEY_ID + "=?", new String[]{idBrand + ""}, null, null, null);
         Brand brand = getBrandFromCursor(result);
-        dbClose();
+        result.close();
         return  brand;
     }
 
     public Brand getBrandFromCursor(final Cursor cursorBrand) {
         Brand brand = new Brand();
-        try {
+        //try {
             if (cursorBrand.moveToFirst()) {
                 brand.setId(Integer.parseInt(cursorBrand.getString(cursorBrand.getColumnIndex(KEY_ID))));
                 brand.setName(cursorBrand.getString(cursorBrand.getColumnIndex(KEY_NAME)));
                 brand.setExtra(cursorBrand.getString(cursorBrand.getColumnIndex(KEY_EXTRA)));
                 brand.setCreatedAt(cursorBrand.getString(cursorBrand.getColumnIndex(KEY_CREATED_AT)));
             }
-        }finally {
-            cursorBrand.close();
-        }
+        //}finally {
+            //cursorBrand.close();
+        //}
         return brand;
     }
 
@@ -438,7 +430,6 @@ public class DataBaseManager {
     }
 
     public List<Serie> getSeries(final int idBrand) {
-        dbOpen();
         Cursor cursorSerie = getSeriesCursor(idBrand);
 
         List<Serie> seriesList = null;
@@ -461,7 +452,7 @@ public class DataBaseManager {
             } while (cursorSerie.moveToNext());
         }
 
-        dbClose();
+        cursorSerie.close();
         return seriesList;
 
     }
@@ -494,22 +485,22 @@ public class DataBaseManager {
             } while (cursorSerie.moveToNext());
         }
 
+        cursorSerie.close();
         return seriesList;
 
     }
 
     public Serie getSerieById(final int idSerie) {
-        dbOpen();
         String[] serieColumns = getSerieColumns();
         Cursor result = db.query(TABLE_NAME_SERIES, serieColumns, KEY_ID + "=?", new String[]{idSerie + ""}, null, null, null);
         Serie serie = getSerieFromCursor(result);
-        dbClose();
+        result.close();
         return serie;
     }
 
     public Serie getSerieFromCursor(final Cursor cursorSerie) {
         Serie serie = null;
-        try {
+        //try {
             if (cursorSerie.moveToFirst()) {
                 serie = new Serie();
                 serie.setId(Integer.parseInt(cursorSerie.getString(cursorSerie.getColumnIndex(KEY_ID))));
@@ -521,14 +512,13 @@ public class DataBaseManager {
 
                 serie.setCreatedAt(cursorSerie.getString(cursorSerie.getColumnIndex(KEY_CREATED_AT)));
             }
-        }finally {
-            cursorSerie.close();
-        }
+        //}finally {
+        //    cursorSerie.close();
+        //}
         return serie;
     }
 
     public Serie getSerieByName(final String serieName, final int idBrand) {
-        dbOpen();
         String[] serieColumns = getSerieColumns();
         Cursor cursor = db.query(TABLE_NAME_SERIES, serieColumns, KEY_NAME + " = ? and "
                 + KEY_ID_BRAND + " = ?", new String[]{serieName, idBrand + ""}, null,
@@ -548,15 +538,13 @@ public class DataBaseManager {
             serie.setCreatedAt(cursor.getString(cursor.getColumnIndex(KEY_CREATED_AT)));
         }
 
-        dbClose();
+        cursor.close();
         return serie;
     }
 
     public void insertSerie(final Serie serie) {
-        dbOpen();
         ContentValues values = getSerieValues(serie);
         db.insert(TABLE_NAME_SERIES, null, values);
-        dbClose();
     }
 
     public ContentValues getSerieValues(final Serie serie) {
