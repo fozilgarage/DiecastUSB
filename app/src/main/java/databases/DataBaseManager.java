@@ -3,14 +3,12 @@ package databases;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import diecast.fozil.com.diecast.SplashActivity;
 
 /**
  * Created by eduardo.benitez on 16/10/2017.
@@ -18,26 +16,26 @@ import diecast.fozil.com.diecast.SplashActivity;
 
 public class DataBaseManager {
 
-    public static final String TABLE_NAME_BRANDS = "brands";
-    public static final String TABLE_NAME_CARS = "cars";
-    public static final String TABLE_NAME_SERIES = "series";
+    private static final String TABLE_NAME_BRANDS = "brands";
+    private static final String TABLE_NAME_CARS = "cars";
+    private static final String TABLE_NAME_SERIES = "series";
 
-    public static final String KEY_ID = "_id";
-    public static final String KEY_NAME = "name";
-    public static final String KEY_CREATED_AT = "created_at";
-    public static final String KEY_EXTRA = "extra";
+    private static final String KEY_ID = "_id";
+    private static final String KEY_NAME = "name";
+    private static final String KEY_CREATED_AT = "created_at";
+    private static final String KEY_EXTRA = "extra";
 
-    public static final String KEY_ID_BRAND = "id_brand";
-    public static final String KEY_ID_SERIE = "id_serie";
-    public static final String KEY_CARS_IMAGE = "image";
-    public static final String KEY_CARS_FAVORITE = "is_favorite";
-    public static final String KEY_CARS_COUNT = "count";
-    public static final String KEY_CARS_HASHTAG = "hashtag";
-    public static final String KEY_CARS_PRICE = "price";
-    public static final String KEY_CARS_PURCHASE_DATE = "purchase_date";
+    private static final String KEY_ID_BRAND = "id_brand";
+    private static final String KEY_ID_SERIE = "id_serie";
+    private static final String KEY_CARS_IMAGE = "image";
+    private static final String KEY_CARS_FAVORITE = "is_favorite";
+    private static final String KEY_CARS_COUNT = "count";
+    private static final String KEY_CARS_HASHTAG = "hashtag";
+    private static final String KEY_CARS_PRICE = "price";
+    private static final String KEY_CARS_PURCHASE_DATE = "purchase_date";
 
 
-    public static final String KEY_SERIES_PARENT = "id_serie_parent";
+    private static final String KEY_SERIES_PARENT = "id_serie_parent";
 
     public static void main(final String[] args) {
         Log.d("DB", DataBaseManager.CREATE_TABLE_SERIES);
@@ -104,7 +102,7 @@ public class DataBaseManager {
         db.delete(TABLE_NAME_CARS, null, null);
     }
 
-    public ContentValues getCarValues(final Car car) {
+    private ContentValues getCarValues(final Car car) {
 
         ContentValues values = getCarValuesWithoutId(car);
         values.put(KEY_ID, car.getId());
@@ -117,8 +115,7 @@ public class DataBaseManager {
     /*      Table Cars
     /*
     /**********************************************/
-
-    public ContentValues getCarValuesWithoutId(final Car car) {
+    private ContentValues getCarValuesWithoutId(final Car car) {
         ContentValues values = new ContentValues();
         values.put(KEY_NAME, car.getName());
         values.put(KEY_ID_BRAND, car.getBrand() != null ? car.getBrand().getId() : null);
@@ -144,8 +141,7 @@ public class DataBaseManager {
 
     public long insertCar(final Car car) {
         ContentValues values = getCarValuesWithoutId(car);
-        long result = db.insert(TABLE_NAME_CARS, null, values);
-        return result;
+        return db.insert(TABLE_NAME_CARS, null, values);
     }
 
     public void deleteCar(int idCar) {
@@ -159,9 +155,8 @@ public class DataBaseManager {
 
     public List<Car> getListCars(final String carName, final int idBrand, final int idSerie,
                                  final int idSubserie, final boolean isDescOrder) {
-        List<Car> carList = new ArrayList<Car>();
-        String[] carColumns = getCarColumns();
-        String whereSentence = "";
+        List<Car> carList = new ArrayList<>();
+        StringBuilder whereSentence = new StringBuilder();
         String[] params = new String[]{};
         String order = "asc";
         if (isDescOrder)
@@ -171,9 +166,9 @@ public class DataBaseManager {
             params = new String[names.length];
             int i = 0;
             for (String name : names) {
-                if (!whereSentence.equals(""))
-                    whereSentence += " or  ";
-                whereSentence += TABLE_NAME_CARS + "." + KEY_NAME + " like ? ";
+                if (!whereSentence.toString().equals(""))
+                    whereSentence.append(" or  ");
+                whereSentence.append(TABLE_NAME_CARS + "." + KEY_NAME + " like ? ");
                 params[i++] ="%" + name + "%";
             }
             //whereSentence = KEY_NAME + " like ?";
@@ -181,39 +176,38 @@ public class DataBaseManager {
         }
 
         if (idBrand >= 0) {
-            if (whereSentence != "") {
-                whereSentence += "and ";
+            if (!whereSentence.toString().equals("")) {
+                whereSentence.append("and ");
             }
             if (idBrand == 0)
-                whereSentence += TABLE_NAME_CARS + "." + KEY_ID_BRAND + " IS NULL ";
+                whereSentence.append(TABLE_NAME_CARS + "." + KEY_ID_BRAND + " IS NULL ");
             else
-                whereSentence += TABLE_NAME_CARS + "." + KEY_ID_BRAND + "=" + idBrand;
+                whereSentence.append(TABLE_NAME_CARS + "." + KEY_ID_BRAND + "=").append(idBrand);
         }
 
         if (idSerie >= 0) {
-            if (whereSentence != "") {
-                whereSentence += " and ";
+            if (!whereSentence.toString().equals("")) {
+                whereSentence.append(" and ");
             }
             if (idSerie == 0)
-                whereSentence += TABLE_NAME_CARS + "." + KEY_ID_SERIE + " IS NULL ";
+                whereSentence.append(TABLE_NAME_CARS + "." + KEY_ID_SERIE + " IS NULL ");
             else
-                whereSentence += "(" + TABLE_NAME_CARS + "." + KEY_ID_SERIE + "=" + idSerie + " OR " +
-                    TABLE_NAME_SERIES + "." + KEY_SERIES_PARENT + "=" + idSerie + ")";
+                whereSentence.append("(" + TABLE_NAME_CARS + "." + KEY_ID_SERIE + "=").append(idSerie).append(" OR ").append(TABLE_NAME_SERIES).append(".").append(KEY_SERIES_PARENT).append("=").append(idSerie).append(")");
         }
 
         if (idSubserie >= 0) {
-            if (whereSentence != "") {
-                whereSentence += " and ";
+            if (!whereSentence.toString().equals("")) {
+                whereSentence.append(" and ");
             }
             if (idSubserie == 0)
-                whereSentence += TABLE_NAME_CARS + "." + KEY_ID_SERIE + " = " + idSerie;
+                whereSentence.append(TABLE_NAME_CARS + "." + KEY_ID_SERIE + " = ").append(idSerie);
             else
-                whereSentence += TABLE_NAME_CARS + "." + KEY_ID_SERIE + "=" + idSubserie;
+                whereSentence.append(TABLE_NAME_CARS + "." + KEY_ID_SERIE + "=").append(idSubserie);
         }
         String query = "SELECT " + TABLE_NAME_CARS + ".* FROM " + TABLE_NAME_CARS;
         if (idSerie > 0)
             query += " LEFT JOIN " + TABLE_NAME_SERIES + " ON " + TABLE_NAME_CARS + "." + KEY_ID_SERIE + " = " + TABLE_NAME_SERIES + "." + KEY_ID;
-        if (!whereSentence.equals(""))
+        if (!whereSentence.toString().equals(""))
             query += " where " + whereSentence;
         query += " order by " + TABLE_NAME_CARS + "." + KEY_ID + " " + order;
 
@@ -246,41 +240,34 @@ public class DataBaseManager {
         return getListCars(null, -1, -1, -1, isDescOrder);
     }
 
-    public List<Car> getListCars(final int idBrand, final int idSerie, final int idSubserie, final boolean isDescOrder) {
-        return getListCars(null, idBrand, idSerie, idSubserie, isDescOrder);
-    }
-
     public Car getCar(final int idCar) {
         String[] carColumns = getCarColumns();
         Cursor cursor = db.query(TABLE_NAME_CARS, carColumns, KEY_ID + " = ?", new String[]{idCar + ""}, null, null, null);
         Car car = new Car();
-        try {
-            if (cursor.moveToFirst()) {
-                car.setId(Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID))));
-                car.setName(cursor.getString(cursor.getColumnIndex(KEY_NAME)));
-                String brand = cursor.getString(cursor.getColumnIndex(KEY_ID_BRAND));
-                if (brand != null && !brand.equals(""))
-                    car.setBrand(getBrandById(Integer.parseInt(brand)));
-                String serie = cursor.getString(cursor.getColumnIndex(KEY_ID_SERIE));
-                if (serie != null && !serie.equals(""))
-                    car.setSerie(getSerieById(Integer.parseInt(serie)));
-                car.setImage(cursor.getString(cursor.getColumnIndex(KEY_CARS_IMAGE)));
-                car.setCreatedAt(cursor.getString(cursor.getColumnIndex(KEY_CREATED_AT)));
-                boolean isFavorite = false;
-                if (cursor.getInt(cursor.getColumnIndex(KEY_CARS_FAVORITE)) == 1)
-                    isFavorite = true;
-                car.setFavorite(isFavorite);
-                car.setCount(cursor.getInt(cursor.getColumnIndex(KEY_CARS_COUNT)));
-                car.setHashtags(cursor.getString(cursor.getColumnIndex(KEY_CARS_HASHTAG)));
-                car.setPrice(cursor.getInt(cursor.getColumnIndex(KEY_CARS_PRICE)));
-                car.setExtra(cursor.getString(cursor.getColumnIndex(KEY_EXTRA)));
-                car.setPurchaseDate(cursor.getString(cursor.getColumnIndex(KEY_CARS_PURCHASE_DATE)));
-            }
-        } catch (Exception e) {
-            Log.e("DataBaseManager", e.getMessage());
-        }finally {
-            cursor.close();
+
+        if (cursor.moveToFirst()) {
+            car.setId(Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID))));
+            car.setName(cursor.getString(cursor.getColumnIndex(KEY_NAME)));
+            String brand = cursor.getString(cursor.getColumnIndex(KEY_ID_BRAND));
+            if (brand != null && !brand.equals(""))
+                car.setBrand(getBrandById(Integer.parseInt(brand)));
+            String serie = cursor.getString(cursor.getColumnIndex(KEY_ID_SERIE));
+            if (serie != null && !serie.equals(""))
+                car.setSerie(getSerieById(Integer.parseInt(serie)));
+            car.setImage(cursor.getString(cursor.getColumnIndex(KEY_CARS_IMAGE)));
+            car.setCreatedAt(cursor.getString(cursor.getColumnIndex(KEY_CREATED_AT)));
+            boolean isFavorite = false;
+            if (cursor.getInt(cursor.getColumnIndex(KEY_CARS_FAVORITE)) == 1)
+                isFavorite = true;
+            car.setFavorite(isFavorite);
+            car.setCount(cursor.getInt(cursor.getColumnIndex(KEY_CARS_COUNT)));
+            car.setHashtags(cursor.getString(cursor.getColumnIndex(KEY_CARS_HASHTAG)));
+            car.setPrice(cursor.getInt(cursor.getColumnIndex(KEY_CARS_PRICE)));
+            car.setExtra(cursor.getString(cursor.getColumnIndex(KEY_EXTRA)));
+            car.setPurchaseDate(cursor.getString(cursor.getColumnIndex(KEY_CARS_PURCHASE_DATE)));
         }
+
+        cursor.close();
 
         return car;
     }
@@ -298,7 +285,7 @@ public class DataBaseManager {
     /*
     /**********************************************/
 
-    public ContentValues getBrandValues(final Brand brand) {
+    private ContentValues getBrandValues(final Brand brand) {
         ContentValues values = new ContentValues();
         values.put(KEY_NAME, brand.getName());
         values.put(KEY_EXTRA, brand.getExtra());
@@ -325,7 +312,7 @@ public class DataBaseManager {
 
         List<Brand> brandList = null;
         if (brandsCursor.moveToFirst()) {
-            brandList = new ArrayList<Brand>();
+            brandList = new ArrayList<>();
             do {
                 Brand brand = new Brand();
                 brand.setId(Integer.parseInt(brandsCursor.getString(brandsCursor.getColumnIndex(KEY_ID))));
@@ -356,7 +343,8 @@ public class DataBaseManager {
             brand.setCreatedAt(cursor.getString(cursor.getColumnIndex(KEY_CREATED_AT)));
         }
 
-        cursor.close();
+        if (cursor != null)
+            cursor.close();
         return brand;
     }
 
@@ -368,18 +356,16 @@ public class DataBaseManager {
         return  brand;
     }
 
-    public Brand getBrandFromCursor(final Cursor cursorBrand) {
+    private Brand getBrandFromCursor(final Cursor cursorBrand) {
         Brand brand = new Brand();
-        //try {
-            if (cursorBrand.moveToFirst()) {
-                brand.setId(Integer.parseInt(cursorBrand.getString(cursorBrand.getColumnIndex(KEY_ID))));
-                brand.setName(cursorBrand.getString(cursorBrand.getColumnIndex(KEY_NAME)));
-                brand.setExtra(cursorBrand.getString(cursorBrand.getColumnIndex(KEY_EXTRA)));
-                brand.setCreatedAt(cursorBrand.getString(cursorBrand.getColumnIndex(KEY_CREATED_AT)));
+
+        if (cursorBrand.moveToFirst()) {
+            brand.setId(Integer.parseInt(cursorBrand.getString(cursorBrand.getColumnIndex(KEY_ID))));
+            brand.setName(cursorBrand.getString(cursorBrand.getColumnIndex(KEY_NAME)));
+            brand.setExtra(cursorBrand.getString(cursorBrand.getColumnIndex(KEY_EXTRA)));
+            brand.setCreatedAt(cursorBrand.getString(cursorBrand.getColumnIndex(KEY_CREATED_AT)));
             }
-        //}finally {
-            //cursorBrand.close();
-        //}
+
         return brand;
     }
 
@@ -434,7 +420,7 @@ public class DataBaseManager {
 
         List<Serie> seriesList = null;
         if (cursorSerie.moveToFirst()) {
-            seriesList = new ArrayList<Serie>();
+            seriesList = new ArrayList<>();
             do {
                 Serie serie = new Serie();
                 serie.setId(Integer.parseInt(cursorSerie.getString(cursorSerie.getColumnIndex(KEY_ID))));
@@ -469,7 +455,7 @@ public class DataBaseManager {
 
         List<Serie> seriesList = null;
         if (cursorSerie.moveToFirst()) {
-            seriesList = new ArrayList<Serie>();
+            seriesList = new ArrayList<>();
             do {
                 Serie serie = new Serie();
                 serie.setId(Integer.parseInt(cursorSerie.getString(cursorSerie.getColumnIndex(KEY_ID))));
@@ -498,7 +484,7 @@ public class DataBaseManager {
         return serie;
     }
 
-    public Serie getSerieFromCursor(final Cursor cursorSerie) {
+    private Serie getSerieFromCursor(final Cursor cursorSerie) {
         Serie serie = null;
         //try {
             if (cursorSerie.moveToFirst()) {
@@ -538,7 +524,8 @@ public class DataBaseManager {
             serie.setCreatedAt(cursor.getString(cursor.getColumnIndex(KEY_CREATED_AT)));
         }
 
-        cursor.close();
+        if (cursor != null)
+            cursor.close();
         return serie;
     }
 
@@ -547,7 +534,7 @@ public class DataBaseManager {
         db.insert(TABLE_NAME_SERIES, null, values);
     }
 
-    public ContentValues getSerieValues(final Serie serie) {
+    private ContentValues getSerieValues(final Serie serie) {
         ContentValues values = new ContentValues();
         values.put(KEY_NAME, serie.getName());
         values.put(KEY_ID_BRAND, serie.getBrand().getId());
