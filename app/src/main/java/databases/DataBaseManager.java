@@ -17,22 +17,22 @@ import java.util.List;
 public class DataBaseManager {
 
     private static final String TABLE_NAME_BRANDS = "brands";
-    private static final String TABLE_NAME_CARS = "cars";
+    static final String TABLE_NAME_CARS = "cars";
     private static final String TABLE_NAME_SERIES = "series";
 
     private static final String KEY_ID = "_id";
     private static final String KEY_NAME = "name";
     private static final String KEY_CREATED_AT = "created_at";
-    private static final String KEY_EXTRA = "extra";
+    static final String KEY_EXTRA = "extra";
 
     private static final String KEY_ID_BRAND = "id_brand";
     private static final String KEY_ID_SERIE = "id_serie";
     private static final String KEY_CARS_IMAGE = "image";
     private static final String KEY_CARS_FAVORITE = "is_favorite";
     private static final String KEY_CARS_COUNT = "count";
-    private static final String KEY_CARS_HASHTAG = "hashtag";
-    private static final String KEY_CARS_PRICE = "price";
-    private static final String KEY_CARS_PURCHASE_DATE = "purchase_date";
+    static final String KEY_CARS_HASHTAG = "hashtag";
+    static final String KEY_CARS_PRICE = "price";
+    static final String KEY_CARS_PURCHASE_DATE = "purchase_date";
 
 
     private static final String KEY_SERIES_PARENT = "id_serie_parent";
