@@ -1,9 +1,11 @@
 package diecast.fozil.com.diecast;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -51,10 +53,16 @@ public class ImportDBActivity extends AppCompatActivity {
 
     private static final int MY_PERMISSIONS = 100;
 
+    ProgressDialog progressDialog;
+
+    File fileImport;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_import_db);
+
+        progressDialog = new ProgressDialog(ImportDBActivity.this);
 
         dataBaseManager = new DataBaseManager(this);
 
@@ -71,10 +79,13 @@ public class ImportDBActivity extends AppCompatActivity {
             File sdCard = Environment.getExternalStorageDirectory();
             String directoryPath = "/Download/FozilGarage";
             final File directory = new File(sdCard.getAbsolutePath() + directoryPath);
+
             List<File> backupFiles = getBackupFiles(directory);
 
-            backupFilesAdapter = new BackupFilesAdapter(getApplicationContext(), backupFiles);
-            lvBackupFiles.setAdapter(backupFilesAdapter);
+            if (backupFiles != null && backupFiles.size() > 0) {
+                backupFilesAdapter = new BackupFilesAdapter(getApplicationContext(), backupFiles);
+                lvBackupFiles.setAdapter(backupFilesAdapter);
+            }
         }
     }
 
@@ -211,7 +222,8 @@ public class ImportDBActivity extends AppCompatActivity {
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    importData(backupFiles.get(position));
+                                    fileImport = backupFiles.get(position);
+                                    new ImportDataTask().execute();
                                 }
                             });
                     builder.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
@@ -253,6 +265,7 @@ public class ImportDBActivity extends AppCompatActivity {
 
             int rowCount = 0;
             while(rowIter.hasNext()){
+                dataBaseManager.dbOpen();
                 XSSFRow myRow = (XSSFRow) rowIter.next();
                 if (myRow.getCell(0) != null) {
                     if (rowCount > 0 && myRow.getCell(1) != null) {
@@ -274,6 +287,7 @@ public class ImportDBActivity extends AppCompatActivity {
                     }
                     rowCount++;
                 }
+                dataBaseManager.dbClose();
             }
 
             Snackbar.make(findViewById(R.id.layout_excel_files), "Se agregaron" + (rowCount -1) + "registros.", Snackbar.LENGTH_LONG).show();
@@ -334,6 +348,28 @@ public class ImportDBActivity extends AppCompatActivity {
         if (text.equals("SI"))
             isFavBool = true;
         return isFavBool;
+    }
+
+    private class ImportDataTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog.setMessage("Importando datos...");
+            progressDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            importData(fileImport);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            progressDialog.hide();
+        }
     }
 
 }
