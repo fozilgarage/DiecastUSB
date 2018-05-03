@@ -173,7 +173,7 @@ public class AddSeries extends AppCompatActivity {
 
             }
 
-            idSaved = dataBaseManager.getSerieByName(tv_serie_name.getText().toString(), brand.getId()).getId();
+            idSaved = dataBaseManager.getSerieByName(tv_serie_name.getText().toString(), brand.getId(), null).getId();
 
             Intent returnIntent = new Intent();
             returnIntent.putExtra("result",1);

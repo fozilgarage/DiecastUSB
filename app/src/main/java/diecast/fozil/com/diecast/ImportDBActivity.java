@@ -329,7 +329,7 @@ public class ImportDBActivity extends AppCompatActivity {
 
     private Serie getOrCreateSerieByName(final String serieName, final Brand brand,
                                          final Serie parent) {
-        Serie serie = dataBaseManager.getSerieByName(serieName, brand.getId());
+        Serie serie = dataBaseManager.getSerieByName(serieName, brand.getId(), parent);
         if (serie == null) {
             serie = new Serie();
             serie.setName(serieName);
@@ -337,7 +337,7 @@ public class ImportDBActivity extends AppCompatActivity {
             if (parent != null)
                 serie.setParent(dataBaseManager.getSerieById(parent.getId()));
             dataBaseManager.insertSerie(serie);
-            serie = dataBaseManager.getSerieByName(serieName, brand.getId());
+            serie = dataBaseManager.getSerieByName(serieName, brand.getId(), parent);
         }
         return serie;
     }

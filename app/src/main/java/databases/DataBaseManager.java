@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -504,10 +505,18 @@ public class DataBaseManager {
         return serie;
     }
 
-    public Serie getSerieByName(final String serieName, final int idBrand) {
+    public Serie getSerieByName(final String serieName, final int idBrand, final Serie parent) {
         String[] serieColumns = getSerieColumns();
-        Cursor cursor = db.query(TABLE_NAME_SERIES, serieColumns, KEY_NAME + " = ? and "
-                + KEY_ID_BRAND + " = ?", new String[]{serieName, idBrand + ""}, null,
+        StringBuilder whereSentence =  new StringBuilder(KEY_NAME + " = ? and "
+                + KEY_ID_BRAND + " = ? ");
+        List<String> queryValues = new ArrayList<String>(Arrays.asList(serieName, idBrand + ""));
+        if (parent != null) {
+            whereSentence.append(" and " + KEY_SERIES_PARENT + " = ? ");
+            queryValues.add(parent.getId() + "");
+        }
+
+        String[] stockArr = new String[queryValues.size()];
+        Cursor cursor = db.query(TABLE_NAME_SERIES, serieColumns, whereSentence.toString(), queryValues.toArray(stockArr), null,
                 null, null);
 
         Serie serie = null;
@@ -517,9 +526,7 @@ public class DataBaseManager {
             serie.setId(cursor.getInt(cursor.getColumnIndex(KEY_ID)));
             serie.setName(cursor.getString(cursor.getColumnIndex(KEY_NAME)));
             serie.setBrand(getBrandById(cursor.getInt(cursor.getColumnIndex(KEY_ID_BRAND))));
-            String parent = cursor.getString(cursor.getColumnIndex(KEY_SERIES_PARENT));
-            if (parent != null && !parent.equals(""))
-                serie.setParent(getSerieById(Integer.parseInt(parent)));
+            serie.setParent(parent);
             serie.setIsDefault(false);
             serie.setCreatedAt(cursor.getString(cursor.getColumnIndex(KEY_CREATED_AT)));
         }
