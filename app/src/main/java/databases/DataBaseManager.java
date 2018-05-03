@@ -3,6 +3,7 @@ package databases;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
@@ -81,20 +82,27 @@ public class DataBaseManager {
     public static final String ALTER_TABLE_CARS_ADD_COUNT = "alter table " + TABLE_NAME_CARS +
             " add column " + KEY_CARS_COUNT + " integer default 1;";*/
 
-    private SplashActivity.DataBaseHelper dataBaseHelper;
+    private DataBaseHelper dataBaseHelper;
     private SQLiteDatabase db;
 
     public DataBaseManager(Context context) {
-        dataBaseHelper = new SplashActivity.DataBaseHelper(context);
-        db = dataBaseHelper.getWritableDatabase();
-
+        dataBaseHelper = DataBaseHelper.getInstance(context);
     }
 
+    private void dbOpen() {
+        db = dataBaseHelper.getDataBase();
+    }
+
+    private void dbClose() {
+        dataBaseHelper.close();
+    }
 
     public void removeAll() {
+        dbOpen();
         db.delete(TABLE_NAME_SERIES, null, null);
         db.delete(TABLE_NAME_BRANDS, null, null);
         db.delete(TABLE_NAME_CARS, null, null);
+        dbClose();
     }
 
     public ContentValues getCarValues(final Car car) {
@@ -136,8 +144,10 @@ public class DataBaseManager {
     }
 
     public long insertCar(final Car car) {
+        dbOpen();
         ContentValues values = getCarValuesWithoutId(car);
         long result = db.insert(TABLE_NAME_CARS, null, values);
+        dbClose();
         return result;
     }
 
@@ -152,6 +162,7 @@ public class DataBaseManager {
 
     public List<Car> getListCars(final String carName, final int idBrand, final int idSerie,
                                  final int idSubserie, final boolean isDescOrder) {
+        dbOpen();
         List<Car> carList = new ArrayList<Car>();
         String[] carColumns = getCarColumns();
         String whereSentence = "";
@@ -231,6 +242,7 @@ public class DataBaseManager {
             } while (cursor.moveToNext());
         }
 
+        dbClose();
         return carList;
     }
 
@@ -302,8 +314,10 @@ public class DataBaseManager {
     }
 
     public void insertBrand(final Brand brand) {
+        dbOpen();
         ContentValues values = getBrandValues(brand);
         db.insert(TABLE_NAME_BRANDS, null, values);
+        dbClose();
     }
 
     private Cursor getBrandsCursor() {
@@ -312,6 +326,7 @@ public class DataBaseManager {
     }
 
     public List<Brand> getBrands() {
+        dbOpen();
         Cursor brandsCursor = getBrandsCursor();
 
         List<Brand> brandList = null;
@@ -328,11 +343,13 @@ public class DataBaseManager {
             } while (brandsCursor.moveToNext());
         }
 
+        dbClose();
         return brandList;
 
     }
 
     public Brand getBrandByName(final String brandName) {
+        dbOpen();
         String[] brandColumns = getBrandColumns();
         Cursor cursor = db.query(TABLE_NAME_BRANDS, brandColumns, KEY_NAME + " = ?", new String[]{brandName}, null, null, null);
 
@@ -346,13 +363,17 @@ public class DataBaseManager {
             brand.setCreatedAt(cursor.getString(cursor.getColumnIndex(KEY_CREATED_AT)));
         }
 
+        dbClose();
         return brand;
     }
 
     public Brand getBrandById(final int idBrand) {
+        dbOpen();
         String[] brandColumns = getBrandColumns();
         Cursor result = db.query(TABLE_NAME_BRANDS, brandColumns, KEY_ID + "=?", new String[]{idBrand + ""}, null, null, null);
-        return getBrandFromCursor(result);
+        Brand brand = getBrandFromCursor(result);
+        dbClose();
+        return  brand;
     }
 
     public Brand getBrandFromCursor(final Cursor cursorBrand) {
@@ -417,6 +438,7 @@ public class DataBaseManager {
     }
 
     public List<Serie> getSeries(final int idBrand) {
+        dbOpen();
         Cursor cursorSerie = getSeriesCursor(idBrand);
 
         List<Serie> seriesList = null;
@@ -426,6 +448,7 @@ public class DataBaseManager {
                 Serie serie = new Serie();
                 serie.setId(Integer.parseInt(cursorSerie.getString(cursorSerie.getColumnIndex(KEY_ID))));
                 serie.setName(cursorSerie.getString(cursorSerie.getColumnIndex(KEY_NAME)));
+                Log.d("***", serie.getName());
                 serie.setBrand(getBrandById(Integer.parseInt(cursorSerie.getString(cursorSerie.getColumnIndex(KEY_ID_BRAND)))));
                 String idParent = cursorSerie.getString(cursorSerie.getColumnIndex(KEY_SERIES_PARENT));
                 if (idParent != null)
@@ -438,6 +461,7 @@ public class DataBaseManager {
             } while (cursorSerie.moveToNext());
         }
 
+        dbClose();
         return seriesList;
 
     }
@@ -475,9 +499,12 @@ public class DataBaseManager {
     }
 
     public Serie getSerieById(final int idSerie) {
+        dbOpen();
         String[] serieColumns = getSerieColumns();
         Cursor result = db.query(TABLE_NAME_SERIES, serieColumns, KEY_ID + "=?", new String[]{idSerie + ""}, null, null, null);
-        return getSerieFromCursor(result);
+        Serie serie = getSerieFromCursor(result);
+        dbClose();
+        return serie;
     }
 
     public Serie getSerieFromCursor(final Cursor cursorSerie) {
@@ -501,6 +528,7 @@ public class DataBaseManager {
     }
 
     public Serie getSerieByName(final String serieName, final int idBrand) {
+        dbOpen();
         String[] serieColumns = getSerieColumns();
         Cursor cursor = db.query(TABLE_NAME_SERIES, serieColumns, KEY_NAME + " = ? and "
                 + KEY_ID_BRAND + " = ?", new String[]{serieName, idBrand + ""}, null,
@@ -520,12 +548,15 @@ public class DataBaseManager {
             serie.setCreatedAt(cursor.getString(cursor.getColumnIndex(KEY_CREATED_AT)));
         }
 
+        dbClose();
         return serie;
     }
 
     public void insertSerie(final Serie serie) {
+        dbOpen();
         ContentValues values = getSerieValues(serie);
         db.insert(TABLE_NAME_SERIES, null, values);
+        dbClose();
     }
 
     public ContentValues getSerieValues(final Serie serie) {
