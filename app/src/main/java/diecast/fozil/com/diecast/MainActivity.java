@@ -23,7 +23,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +32,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.github.snowdream.android.widget.SmartImageView;
@@ -47,7 +47,7 @@ import databases.DataBaseManager;
 import databases.Serie;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, SearchView.OnQueryTextListener {
 
     public static final String ACTIVITY_NAME = "MAIN_ACTIVITY";
     public static final int SAVE_CAR = 1;
@@ -83,13 +83,15 @@ public class MainActivity extends AppCompatActivity
 
     int clickOnFilterButton;
 
+    SearchView searchView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = setToolBar("Mi Garage");
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
@@ -101,16 +103,16 @@ public class MainActivity extends AppCompatActivity
         if (message != null && !message.equals(""))
             showMessage(message);
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         dataBaseManager = new DataBaseManager(this);
 
-        listView = (ListView) findViewById(R.id.lv_catalogo);
-        tv_cars_count = (TextView) findViewById(R.id.tv_cars_count);
-        main_layout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ll_search_detail = (LinearLayout) findViewById(R.id.ll_search_detail);
-        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.list_layout);
+        listView = findViewById(R.id.lv_catalogo);
+        tv_cars_count = findViewById(R.id.tv_cars_count);
+        main_layout = findViewById(R.id.drawer_layout);
+        ll_search_detail = findViewById(R.id.ll_search_detail);
+        swipeRefreshLayout = findViewById(R.id.list_layout);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -129,7 +131,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private Toolbar setToolBar(final String name) {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(name);
 
@@ -155,47 +157,42 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_search, menu);
+        getMenuInflater().inflate(R.menu.menu_search, menu);
 
-        final MenuItem menuItem = menu.findItem(R.id.menuSearch);
-        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(menuItem);
-
-        searchView.setQueryHint("Buscar por nombre");
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                //doSearch(query);
-                //searchView.setQuery("", false);
-                //searchView.setIconified(true);
-                if(query.equals(""))
-                    ll_search_detail.setVisibility(View.GONE);
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                doSearch(newText);
-                return false;
-            }
-
-            public void doSearch(String query) {
-                querySearch = query;
-                new SearchTask().execute();
-                if(query.equals(""))
-                    ll_search_detail.setVisibility(View.GONE);
-                else
-                    ll_search_detail.setVisibility(View.VISIBLE);
-            }
-
-        });
+        MenuItem searchItem = menu.findItem(R.id.menuSearch);
+        searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        searchView.setOnQueryTextListener(this);
 
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, MainActivity.class)));
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(
+                new ComponentName(this, MainActivity.class)));
         searchView.setIconifiedByDefault(false);
 
-        return super.onCreateOptionsMenu(menu);
+        return true;
+
     }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        doSearch(query);
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        doSearch(newText);
+        return false;
+    }
+
+    public void doSearch(String query) {
+        querySearch = query;
+        new SearchTask().execute();
+        if(query.equals(""))
+            ll_search_detail.setVisibility(View.GONE);
+        else
+            ll_search_detail.setVisibility(View.VISIBLE);
+    }
+
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -221,7 +218,7 @@ public class MainActivity extends AppCompatActivity
 
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -264,7 +261,7 @@ public class MainActivity extends AppCompatActivity
         LayoutInflater layoutInflater;
         private List<Car> carList;
 
-        public CatalogAdapter(Context applicationContext, List<Car> cars) {
+        private CatalogAdapter(Context applicationContext, List<Car> cars) {
             layoutInflater = (LayoutInflater) applicationContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             carList = cars;
         }
@@ -295,10 +292,10 @@ public class MainActivity extends AppCompatActivity
                 holder = new ViewHolder();
                 view = layoutInflater.inflate(R.layout.activity_main_item, viewGroup, false);
 
-                holder.smartImageView = (SmartImageView) view.findViewById(R.id.imagen1);
-                holder.tv_name = (TextView) view.findViewById(R.id.tv_name);
-                holder.tv_detail = (TextView) view.findViewById(R.id.tv_detail);
-                holder.row_item_car = (LinearLayout) view.findViewById(R.id.row_item_car);
+                holder.smartImageView = view.findViewById(R.id.imagen1);
+                holder.tv_name = view.findViewById(R.id.tv_name);
+                holder.tv_detail = view.findViewById(R.id.tv_detail);
+                holder.row_item_car = view.findViewById(R.id.row_item_car);
 
                 view.setTag(holder);
             } else {
@@ -327,7 +324,7 @@ public class MainActivity extends AppCompatActivity
             String item = " auto";
             if (count > 1)
                 item = " autos";
-            detail.append("\n").append(count + item);
+            detail.append("\n").append(count).append(item);
 
             holder.tv_detail.setText(detail);
 
@@ -401,7 +398,7 @@ public class MainActivity extends AppCompatActivity
 
     private void generateBrandsSpinner() {
 
-        List<Brand> brands = new ArrayList<Brand>();
+        List<Brand> brands = new ArrayList<>();
         brandList = dataBaseManager.getBrands();
         brands.add(new Brand(-1,"Fabricantes (Todos)", null));
         brands.add(new Brand(0,"Desconocido", null));
@@ -440,7 +437,7 @@ public class MainActivity extends AppCompatActivity
 
     private void generateSeriesSpinner(final int idBrand) {
         seriesList = dataBaseManager.getSeries(idBrand);
-        List<Serie> series = new ArrayList<Serie>();
+        List<Serie> series = new ArrayList<>();
         series.add(new Serie(-1,"Series (Todas)"));
         series.add(new Serie(0,"Desconocido"));
         if (seriesList != null)
@@ -472,7 +469,7 @@ public class MainActivity extends AppCompatActivity
 
     private void generateSubserieSpinner(final int idSerie) {
         subseriesList = dataBaseManager.getSubseries(idSerie);
-        List<Serie> subseries = new ArrayList<Serie>();
+        List<Serie> subseries = new ArrayList<>();
         subseries.add(new Serie(-1,"Subseries (Todas)"));
         subseries.add(new Serie(0,"Desconocido"));
         if (subseriesList != null)
@@ -534,4 +531,19 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            doSearch(query);
+            searchView.setQuery(query, false);
+
+        } else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+            String uri = intent.getDataString();
+            Toast.makeText(this, "Suggestion: "+ uri, Toast.LENGTH_LONG).show();
+        }
+    }
+
 }
