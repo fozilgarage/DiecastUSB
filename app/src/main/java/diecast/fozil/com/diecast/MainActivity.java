@@ -535,16 +535,17 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        String name = "";
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
-            doSearch(query);
-            searchView.setQuery(query, false);
-            searchView.clearFocus();
-
+            name = intent.getStringExtra(SearchManager.QUERY);
         } else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-            String uri = intent.getDataString();
-            Toast.makeText(this, "Suggestion: "+ uri, Toast.LENGTH_LONG).show();
+            Uri detailUri = intent.getData();
+            name = detailUri.getLastPathSegment();
+
         }
+        doSearch(name);
+        searchView.setQuery(name, false);
+        searchView.clearFocus();
     }
 
 }

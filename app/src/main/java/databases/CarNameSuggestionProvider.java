@@ -26,9 +26,9 @@ public class CarNameSuggestionProvider extends ContentProvider {
     @Nullable
     @Override
     public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
-        if (names == null || names.isEmpty()) {
+        //if (names == null || names.isEmpty()) {
             names = dataBaseManager.getCarNamesList();
-        }
+        //}
 
         MatrixCursor cursor = new MatrixCursor(
                 new String[] {
@@ -45,7 +45,7 @@ public class CarNameSuggestionProvider extends ContentProvider {
             for (int i = 0; i < lenght && cursor.getCount() < limit; i++) {
                 String name = names.get(i);
                 if (name.toUpperCase().contains(query)){
-                    cursor.addRow(new Object[]{ i, name, i });
+                    cursor.addRow(new Object[]{ i, name, name });
                 }
             }
         }
