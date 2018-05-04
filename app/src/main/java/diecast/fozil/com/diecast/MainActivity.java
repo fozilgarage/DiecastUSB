@@ -539,6 +539,7 @@ public class MainActivity extends AppCompatActivity
             String query = intent.getStringExtra(SearchManager.QUERY);
             doSearch(query);
             searchView.setQuery(query, false);
+            searchView.clearFocus();
 
         } else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
             String uri = intent.getDataString();
