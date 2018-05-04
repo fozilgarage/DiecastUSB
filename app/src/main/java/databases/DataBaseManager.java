@@ -163,16 +163,7 @@ public class DataBaseManager {
         if (isDescOrder)
             order = "desc";
         if (carName != null && !carName.equals("")) {
-            /*String names[] = carName.split(" ");
-            params = new String[names.length];
-            int i = 0;
-            for (String name : names) {
-                if (!whereSentence.toString().equals(""))
-                    whereSentence.append(" or  ");
-                whereSentence.append(TABLE_NAME_CARS + "." + KEY_NAME + " like ? ");
-                params[i++] ="%" + name + "%";
-            }*/
-            whereSentence.append(KEY_NAME + " like ? ");
+            whereSentence.append(TABLE_NAME_CARS + "." + KEY_NAME + " like ? ");
             params = new String[]{"%" + carName + "%"};
         }
 
