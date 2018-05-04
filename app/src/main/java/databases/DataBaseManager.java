@@ -279,6 +279,24 @@ public class DataBaseManager {
         db.update(TABLE_NAME_CARS, values, KEY_ID + "=?", new String[]{idCar + ""});
     }
 
+    public List<String> getCarNamesList() {
+
+        List<String> namesList = new ArrayList<>();
+        String query = "SELECT DISTINCT(" + KEY_NAME + ") FROM " + TABLE_NAME_CARS + " ORDER BY "
+                + KEY_NAME;
+
+        Cursor cursor = db.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                namesList.add(cursor.getString(cursor.getColumnIndex(KEY_NAME)));
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        return namesList;
+    }
+
 
     /***********************************************/
     /*
@@ -554,4 +572,5 @@ public class DataBaseManager {
     public void deleteSeriesByBrand(final Brand brand) {
         db.delete(TABLE_NAME_SERIES, KEY_ID_BRAND + " = ? ", new String[]{brand.getId() + ""});
     }
+
 }
