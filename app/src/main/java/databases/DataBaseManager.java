@@ -163,7 +163,7 @@ public class DataBaseManager {
         if (isDescOrder)
             order = "desc";
         if (carName != null && !carName.equals("")) {
-            String names[] = carName.split(" ");
+            /*String names[] = carName.split(" ");
             params = new String[names.length];
             int i = 0;
             for (String name : names) {
@@ -171,9 +171,9 @@ public class DataBaseManager {
                     whereSentence.append(" or  ");
                 whereSentence.append(TABLE_NAME_CARS + "." + KEY_NAME + " like ? ");
                 params[i++] ="%" + name + "%";
-            }
-            //whereSentence = KEY_NAME + " like ?";
-            //params = new String[]{"%" + carName + "%"};
+            }*/
+            whereSentence.append(KEY_NAME + " like ? ");
+            params = new String[]{"%" + carName + "%"};
         }
 
         if (idBrand >= 0) {
@@ -509,7 +509,7 @@ public class DataBaseManager {
         String[] serieColumns = getSerieColumns();
         StringBuilder whereSentence =  new StringBuilder(KEY_NAME + " = ? and "
                 + KEY_ID_BRAND + " = ? ");
-        List<String> queryValues = new ArrayList<String>(Arrays.asList(serieName, idBrand + ""));
+        List<String> queryValues = new ArrayList<>(Arrays.asList(serieName, idBrand + ""));
         if (parent != null) {
             whereSentence.append(" and " + KEY_SERIES_PARENT + " = ? ");
             queryValues.add(parent.getId() + "");
