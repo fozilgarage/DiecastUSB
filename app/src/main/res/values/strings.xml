@@ -11,5 +11,7 @@
 
     <string name="facebook_app_id">1242574322514325</string>
     <string name="title_activity_brands">BrandsActivity</string>
+    <string name="search_hint">Nombre</string>
+    <string name="search_label">Buscar</string>
 
 </resources>
