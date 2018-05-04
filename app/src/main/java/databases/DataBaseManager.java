@@ -45,7 +45,7 @@ public class DataBaseManager {
         Log.d("DB", DataBaseManager.CREATE_TABLE_CARS);
     }
 
-    private static final String CREATE_TABLE_SERIES = "create table " + TABLE_NAME_SERIES + " ("
+    public static final String CREATE_TABLE_SERIES = "create table " + TABLE_NAME_SERIES + " ("
             + KEY_ID + " integer primary key autoincrement, "
             + KEY_NAME + " text not null,"
             + KEY_ID_BRAND + " integer,"
@@ -54,13 +54,13 @@ public class DataBaseManager {
             + " FOREIGN KEY ("+ KEY_ID_BRAND +") REFERENCES "+TABLE_NAME_BRANDS+"("+KEY_ID+") on delete cascade);";
 
 
-    private static final String CREATE_TABLE_BRANDS = "create table " + TABLE_NAME_BRANDS + " ("
+    public static final String CREATE_TABLE_BRANDS = "create table " + TABLE_NAME_BRANDS + " ("
             + KEY_ID + " integer primary key autoincrement,"
             + KEY_NAME + " text not null,"
             + KEY_EXTRA + " text,"
             + KEY_CREATED_AT + " datetime not null default (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')));";
 
-    private static final String CREATE_TABLE_CARS = "create table " + TABLE_NAME_CARS + " ("
+    public static final String CREATE_TABLE_CARS = "create table " + TABLE_NAME_CARS + " ("
             + KEY_ID + " integer primary key autoincrement,"
             + KEY_NAME + " text not null,"
             + KEY_ID_BRAND + " integer,"
