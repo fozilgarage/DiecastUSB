@@ -13,6 +13,7 @@ import java.util.List;
 
 /**
  * Created by eduardo.benitez on 16/10/2017.
+ * asidefocil@gmail.com
  */
 
 public class DataBaseManager {
@@ -44,7 +45,7 @@ public class DataBaseManager {
         Log.d("DB", DataBaseManager.CREATE_TABLE_CARS);
     }
 
-    public static final String CREATE_TABLE_SERIES = "create table " + TABLE_NAME_SERIES + " ("
+    private static final String CREATE_TABLE_SERIES = "create table " + TABLE_NAME_SERIES + " ("
             + KEY_ID + " integer primary key autoincrement, "
             + KEY_NAME + " text not null,"
             + KEY_ID_BRAND + " integer,"
@@ -53,13 +54,13 @@ public class DataBaseManager {
             + " FOREIGN KEY ("+ KEY_ID_BRAND +") REFERENCES "+TABLE_NAME_BRANDS+"("+KEY_ID+") on delete cascade);";
 
 
-    public static final String CREATE_TABLE_BRANDS = "create table " + TABLE_NAME_BRANDS + " ("
+    private static final String CREATE_TABLE_BRANDS = "create table " + TABLE_NAME_BRANDS + " ("
             + KEY_ID + " integer primary key autoincrement,"
             + KEY_NAME + " text not null,"
             + KEY_EXTRA + " text,"
             + KEY_CREATED_AT + " datetime not null default (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')));";
 
-    public static final String CREATE_TABLE_CARS = "create table " + TABLE_NAME_CARS + " ("
+    private static final String CREATE_TABLE_CARS = "create table " + TABLE_NAME_CARS + " ("
             + KEY_ID + " integer primary key autoincrement,"
             + KEY_NAME + " text not null,"
             + KEY_ID_BRAND + " integer,"
